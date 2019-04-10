@@ -34,3 +34,5 @@ hs_err_pid*
 /**/*-gen/**
 /**/test-bin/**
 /dk\.sdu\.mdsd\.guilang/model/generated/
+
+\.metadata/
