@@ -1,0 +1,12 @@
+grammar org.sdu.mdsd.guilang.Guilang with org.eclipse.xtext.common.Terminals
+
+generate guilang "http://www.sdu.org/mdsd/guilang/Guilang"
+
+GUI:
+	debug?=Debug?
+	variables+=Variable*
+;
+
+Debug:
+	'debug'
+;

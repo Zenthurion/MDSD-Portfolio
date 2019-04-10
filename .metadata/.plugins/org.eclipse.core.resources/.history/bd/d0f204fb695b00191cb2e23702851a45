@@ -1,0 +1,55 @@
+grammar org.sdu.mdsd.guilang.Guilang with org.eclipse.xtext.common.Terminals
+
+generate guilang "http://www.sdu.org/mdsd/guilang/Guilang"
+
+GUI:
+	debug?=Debug?
+	variables+=Variable*
+	main=Main
+	templates+=Template*
+;
+
+Debug: 
+	'debug'
+;
+
+Main returns Unit:
+	'main' Unit
+;
+
+Unit:
+	OPEN
+		layout=Layout
+		specifications=Specifications?
+	CLOSE
+;
+
+Template:
+	'template' name=ID unit=Unit
+;
+
+Entity:
+	Layout | Element
+;
+
+Layout:
+	(
+		{Vertical} key=('vertical' | 'v') |
+		{Horizontal} key('horizontal' | 'h')
+	) name=ID? OPEN entities += Entity*	CLOSE
+;
+
+Element: 
+		{Label} key=('lbl' | 'label') |
+		{Button} key=('btn' | 'button') | 
+		{Input} key=('field' | 'input') | 
+		{Checkbox} key=('chk' | 'checkbox') |
+		{TextArea} key=('text-area') |
+		{TemplateInstance} (key?='new')? ref=[Template] |
+	) name=ID
+;
+
+Specifications:
+	{Specifications} 'elements' OPEN
+		list+=Specification*
+;

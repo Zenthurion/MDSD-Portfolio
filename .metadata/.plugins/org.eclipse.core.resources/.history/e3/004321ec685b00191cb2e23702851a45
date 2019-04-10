@@ -1,0 +1,9 @@
+grammar org.sdu.mdsd.guilang.Guilang with org.eclipse.xtext.common.Terminals
+
+generate guilang "http://www.sdu.org/mdsd/guilang/Guilang"
+
+Model:
+	greetings+=Greeting*;
+	
+Greeting:
+	'Hello' name=ID '!';

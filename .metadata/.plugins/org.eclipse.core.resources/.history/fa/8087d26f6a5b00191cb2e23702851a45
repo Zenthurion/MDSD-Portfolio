@@ -1,0 +1,107 @@
+grammar org.sdu.mdsd.guilang.Guilang with org.eclipse.xtext.common.Terminals
+
+generate guilang "http://www.sdu.org/mdsd/guilang/Guilang"
+
+GUI:
+	debug?=Debug?
+	variables+=Variable*
+	main=Main
+	templates+=Template*
+;
+
+Debug: 
+	'debug'
+;
+
+Main returns Unit:
+	'main' Unit
+;
+
+Unit:
+	OPEN
+		layout=Layout
+		specifications=Specifications?
+	CLOSE
+;
+
+Template:
+	'template' name=ID unit=Unit
+;
+
+Entity:
+	Layout | Element
+;
+
+Layout:
+	(
+		{Vertical} key=('vertical' | 'v') |
+		{Horizontal} key('horizontal' | 'h')
+	) name=ID? OPEN entities += Entity*	CLOSE
+;
+
+Element: 
+		{Label} key=('lbl' | 'label') |
+		{Button} key=('btn' | 'button') | 
+		{Input} key=('field' | 'input') | 
+		{Checkbox} key=('chk' | 'checkbox') |
+		{TextArea} key=('text-area') |
+		{TemplateInstance} (key?='new')? ref=[Template] |
+	) name=ID
+;
+
+Specifications:
+	{Specifications} 'elements' OPEN
+		list+=Specification*
+	CLOSE
+;
+
+Specification:
+	ref=[Entity] OPEN options+=Option* CLOSE
+;
+
+Option:
+	{DimOption} (key='dim' | key='dimensions') (width=INT'x'height=INT | ('w'| 'width') width=INT  ('h'| 'height') height=INT) |
+	{SizeOption} key='size' value=STRING |
+    {BackgroundColor} key='bg-color' (color=STRING | ref=[ColorVariable]) |
+	{TextColor} key='text-color' (color=STRING | ref=[ColorVariable]) |
+	{TextSize} key='text-size' value=INT unit=('px' | '%') |
+    {TextValue} key='text' value=STRING |
+    {TextValidate} key='validate' (value=RegexValidate | ref=[RegexVariable] | preset=PresetTextValidate) |
+    {CheckboxValidate} key='validate' (value='is-checked' | value='is-unchecked') |
+    {RequireElements} key='require' req=Require
+;
+
+Variable:
+	{ColorVariable} 'color' name=ID '=' value=STRING |
+	{RegexVariable} 'regex' name=ID '=' value=STRING
+;
+
+RegexValidate:
+	'regex' '=' value=STRING
+;
+
+enum PresetTextValidate:
+	password |
+	email |
+	not_empty
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
