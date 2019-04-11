@@ -4,48 +4,48 @@
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
 			contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
 			default="true"
 			extensions="gui,template,style"
-			id="org.sdu.mdsd.guilang.Guilang"
+			id="dk.sdu.mdsd.guilang.Guilang"
 			name="Guilang Editor">
 		</editor>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
 			commandId="org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclaration">
 			<activeWhen>
 				<reference
-					definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+					definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
 		<handler
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
-			commandId="org.sdu.mdsd.guilang.Guilang.validate">
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
+			commandId="dk.sdu.mdsd.guilang.Guilang.validate">
 		<activeWhen>
 			<reference
-					definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+					definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 			</reference>
 		</activeWhen>
 		</handler>
 		<!-- copy qualified name -->
 		<handler
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName">
 			<activeWhen>
-				<reference definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened" />
+				<reference definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened" />
 			</activeWhen>
 		</handler>
 		<handler
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName">
 			<activeWhen>
 				<and>
-					<reference definitionId="org.sdu.mdsd.guilang.Guilang.XtextEditor.opened" />
+					<reference definitionId="dk.sdu.mdsd.guilang.Guilang.XtextEditor.opened" />
 					<iterate>
 						<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
 					</iterate>
@@ -54,22 +54,22 @@
 		</handler>
 	</extension>
 	<extension point="org.eclipse.core.expressions.definitions">
-		<definition id="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+		<definition id="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 			<and>
 				<reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
 				<with variable="activeEditor">
 					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="org.sdu.mdsd.guilang.Guilang"
+						value="dk.sdu.mdsd.guilang.Guilang"
 						forcePluginActivation="true"/>
 				</with>
 			</and>
 		</definition>
-		<definition id="org.sdu.mdsd.guilang.Guilang.XtextEditor.opened">
+		<definition id="dk.sdu.mdsd.guilang.Guilang.XtextEditor.opened">
 			<and>
 				<reference definitionId="isXtextEditorActive"/>
 				<with variable="activeEditor">
 					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="org.sdu.mdsd.guilang.Guilang"
+						value="dk.sdu.mdsd.guilang.Guilang"
 						forcePluginActivation="true"/>
 				</with>
 			</and>
@@ -78,33 +78,33 @@
 	<extension
 			point="org.eclipse.ui.preferencePages">
 		<page
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-			id="org.sdu.mdsd.guilang.Guilang"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+			id="dk.sdu.mdsd.guilang.Guilang"
 			name="Guilang">
-			<keywordReference id="org.sdu.mdsd.guilang.ui.keyword_Guilang"/>
+			<keywordReference id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"/>
 		</page>
 		<page
-			category="org.sdu.mdsd.guilang.Guilang"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
-			id="org.sdu.mdsd.guilang.Guilang.coloring"
+			category="dk.sdu.mdsd.guilang.Guilang"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
+			id="dk.sdu.mdsd.guilang.Guilang.coloring"
 			name="Syntax Coloring">
-			<keywordReference id="org.sdu.mdsd.guilang.ui.keyword_Guilang"/>
+			<keywordReference id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"/>
 		</page>
 		<page
-			category="org.sdu.mdsd.guilang.Guilang"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
-			id="org.sdu.mdsd.guilang.Guilang.templates"
+			category="dk.sdu.mdsd.guilang.Guilang"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
+			id="dk.sdu.mdsd.guilang.Guilang.templates"
 			name="Templates">
-			<keywordReference id="org.sdu.mdsd.guilang.ui.keyword_Guilang"/>
+			<keywordReference id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"/>
 		</page>
 	</extension>
 	<extension
 			point="org.eclipse.ui.propertyPages">
 		<page
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-			id="org.sdu.mdsd.guilang.Guilang"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+			id="dk.sdu.mdsd.guilang.Guilang"
 			name="Guilang">
-			<keywordReference id="org.sdu.mdsd.guilang.ui.keyword_Guilang"/>
+			<keywordReference id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"/>
 			<enabledWhen>
 				<adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -114,14 +114,14 @@
 	<extension
 		point="org.eclipse.ui.keywords">
 		<keyword
-			id="org.sdu.mdsd.guilang.ui.keyword_Guilang"
+			id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"
 			label="Guilang"/>
 	</extension>
 	<extension
 		point="org.eclipse.ui.commands">
 	<command
 			description="Trigger expensive validation"
-			id="org.sdu.mdsd.guilang.Guilang.validate"
+			id="dk.sdu.mdsd.guilang.Guilang.validate"
 			name="Validate">
 	</command>
 	<!-- copy qualified name -->
@@ -142,12 +142,12 @@
 		<menuContribution
 			locationURI="popup:#TextEditorContext?after=group.edit">
 			 <command
-				 commandId="org.sdu.mdsd.guilang.Guilang.validate"
+				 commandId="dk.sdu.mdsd.guilang.Guilang.validate"
 				 style="push"
 				 tooltip="Trigger expensive validation">
 			<visibleWhen checkEnabled="false">
 				<reference
-					definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+					definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 				</reference>
 			</visibleWhen>
 		</command>
@@ -157,7 +157,7 @@
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened" />
+					<reference definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -165,7 +165,7 @@
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened" />
+					<reference definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -174,7 +174,7 @@
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
 					<and>
-						<reference definitionId="org.sdu.mdsd.guilang.Guilang.XtextEditor.opened" />
+						<reference definitionId="dk.sdu.mdsd.guilang.Guilang.XtextEditor.opened" />
 						<iterate>
 							<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
 						</iterate>
@@ -187,7 +187,7 @@
 		<menuContribution locationURI="popup:#TextEditorContext?endof=group.find">
 			<command commandId="org.eclipse.xtext.ui.editor.FindReferences">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+					<reference definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 					</reference>
 				</visibleWhen>
 			</command>
@@ -195,11 +195,11 @@
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
 			commandId="org.eclipse.xtext.ui.editor.FindReferences">
 			<activeWhen>
 				<reference
-					definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+					definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -208,7 +208,7 @@
 		<content-type
 			base-type="org.eclipse.core.runtime.text"
 			file-extensions="gui,template,style"
-			id="org.sdu.mdsd.guilang.Guilang.contenttype"
+			id="dk.sdu.mdsd.guilang.Guilang.contenttype"
 			name="Guilang File"
 			priority="normal">
 		</content-type>
@@ -217,43 +217,43 @@
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
 			type="gui">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
 		<resourceServiceProvider
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 			uriExtension="gui">
 		</resourceServiceProvider>
 	</extension>
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
 			type="template">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
 		<resourceServiceProvider
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 			uriExtension="template">
 		</resourceServiceProvider>
 	</extension>
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
 			type="style">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
 		<resourceServiceProvider
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
 			uriExtension="style">
 		</resourceServiceProvider>
 	</extension>
-	<!-- marker definitions for org.sdu.mdsd.guilang.Guilang -->
+	<!-- marker definitions for dk.sdu.mdsd.guilang.Guilang -->
 	<extension
 			id="guilang.check.fast"
 			name="Guilang Problem"
@@ -277,34 +277,34 @@
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="org.sdu.mdsd.guilang.Guilang"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.validation.ValidatorPreferencePage"
-			id="org.sdu.mdsd.guilang.Guilang.validator.preferencePage"
+			category="dk.sdu.mdsd.guilang.Guilang"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.validation.ValidatorPreferencePage"
+			id="dk.sdu.mdsd.guilang.Guilang.validator.preferencePage"
 			name="Errors/Warnings">
-			<keywordReference id="org.sdu.mdsd.guilang.ui.keyword_Guilang"/>
+			<keywordReference id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.xtext.builder.participant">
 		<participant
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
 			fileExtensions="gui,template,style"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="org.sdu.mdsd.guilang.Guilang"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-			id="org.sdu.mdsd.guilang.Guilang.compiler.preferencePage"
+			category="dk.sdu.mdsd.guilang.Guilang"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+			id="dk.sdu.mdsd.guilang.Guilang.compiler.preferencePage"
 			name="Compiler">
-			<keywordReference id="org.sdu.mdsd.guilang.ui.keyword_Guilang"/>
+			<keywordReference id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.ui.propertyPages">
 		<page
-			category="org.sdu.mdsd.guilang.Guilang"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-			id="org.sdu.mdsd.guilang.Guilang.compiler.propertyPage"
+			category="dk.sdu.mdsd.guilang.Guilang"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+			id="dk.sdu.mdsd.guilang.Guilang.compiler.propertyPage"
 			name="Compiler">
-			<keywordReference id="org.sdu.mdsd.guilang.ui.keyword_Guilang"/>
+			<keywordReference id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"/>
 			<enabledWhen>
 				<adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -315,20 +315,20 @@
 		<menuContribution locationURI="popup:#TextEditorContext?after=xtext.ui.openDeclaration">
 			<command
 				commandId="org.eclipse.xtext.ui.OpenGeneratedFileCommand"
-				id="org.sdu.mdsd.guilang.Guilang.OpenGeneratedCode"
+				id="dk.sdu.mdsd.guilang.Guilang.OpenGeneratedCode"
 				style="push">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened" />
+					<reference definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.generator.trace.OpenGeneratedFileHandler"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.generator.trace.OpenGeneratedFileHandler"
 			commandId="org.eclipse.xtext.ui.OpenGeneratedFileCommand">
 			<activeWhen>
-				<reference definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened" />
+				<reference definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened" />
 			</activeWhen>
 		</handler>
 	</extension>
@@ -336,11 +336,11 @@
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler 
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
 			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
 			<activeWhen>
 				<reference
-					definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+					definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -360,16 +360,16 @@
 				style="push"
 				tooltip="Open Quick Outline">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened"/>
+					<reference definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened"/>
 				</visibleWhen>
 			</command>
 		</menuContribution>
 	</extension>
-	<!-- quickfix marker resolution generator for org.sdu.mdsd.guilang.Guilang -->
+	<!-- quickfix marker resolution generator for dk.sdu.mdsd.guilang.Guilang -->
 	<extension
 			point="org.eclipse.ui.ide.markerResolution">
 		<markerResolutionGenerator
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
 			markerType="dk.sdu.mdsd.guilang.ui.guilang.check.fast">
 			<attribute
 				name="FIXABLE_KEY"
@@ -377,7 +377,7 @@
 			</attribute>
 		</markerResolutionGenerator>
 		<markerResolutionGenerator
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
 			markerType="dk.sdu.mdsd.guilang.ui.guilang.check.normal">
 			<attribute
 				name="FIXABLE_KEY"
@@ -385,7 +385,7 @@
 			</attribute>
 		</markerResolutionGenerator>
 		<markerResolutionGenerator
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.quickfix.MarkerResolutionGenerator"
 			markerType="dk.sdu.mdsd.guilang.ui.guilang.check.expensive">
 			<attribute
 				name="FIXABLE_KEY"
@@ -396,11 +396,11 @@
 	<!-- Rename Refactoring -->
 	<extension point="org.eclipse.ui.handlers">
 		<handler 
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.DefaultRenameElementHandler"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.DefaultRenameElementHandler"
 			commandId="org.eclipse.xtext.ui.refactoring.RenameElement">
 			<activeWhen>
 				<reference
-					definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+					definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -412,7 +412,7 @@
 				style="push">
 				<visibleWhen checkEnabled="false">
 					<reference
-						definitionId="org.sdu.mdsd.guilang.Guilang.Editor.opened">
+						definitionId="dk.sdu.mdsd.guilang.Guilang.Editor.opened">
 					</reference>
 				</visibleWhen>
 			</command>
@@ -420,34 +420,34 @@
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="org.sdu.mdsd.guilang.Guilang"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
-			id="org.sdu.mdsd.guilang.Guilang.refactoring"
+			category="dk.sdu.mdsd.guilang.Guilang"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.refactoring.ui.RefactoringPreferencePage"
+			id="dk.sdu.mdsd.guilang.Guilang.refactoring"
 			name="Refactoring">
-			<keywordReference id="org.sdu.mdsd.guilang.ui.keyword_Guilang"/>
+			<keywordReference id="dk.sdu.mdsd.guilang.ui.keyword_Guilang"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.compare.contentViewers">
-		<viewer id="org.sdu.mdsd.guilang.Guilang.compare.contentViewers"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+		<viewer id="dk.sdu.mdsd.guilang.Guilang.compare.contentViewers"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="gui,template,style">
 		</viewer>
 		<contentTypeBinding
-			contentTypeId="org.sdu.mdsd.guilang.Guilang.contenttype"
-			contentViewerId="org.sdu.mdsd.guilang.Guilang.compare.contentViewers" />
+			contentTypeId="dk.sdu.mdsd.guilang.Guilang.contenttype"
+			contentViewerId="dk.sdu.mdsd.guilang.Guilang.compare.contentViewers" />
 	</extension>
 	<extension point="org.eclipse.compare.contentMergeViewers">
-		<viewer id="org.sdu.mdsd.guilang.Guilang.compare.contentMergeViewers"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
+		<viewer id="dk.sdu.mdsd.guilang.Guilang.compare.contentMergeViewers"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.compare.InjectableViewerCreator"
 			extensions="gui,template,style" label="Guilang Compare">
 		</viewer>
 		<contentTypeBinding
-			contentTypeId="org.sdu.mdsd.guilang.Guilang.contenttype"
-			contentMergeViewerId="org.sdu.mdsd.guilang.Guilang.compare.contentMergeViewers" />
+			contentTypeId="dk.sdu.mdsd.guilang.Guilang.contenttype"
+			contentMergeViewerId="dk.sdu.mdsd.guilang.Guilang.compare.contentMergeViewers" />
 	</extension>
 	<extension point="org.eclipse.ui.editors.documentProviders">
-		<provider id="org.sdu.mdsd.guilang.Guilang.editors.documentProviders"
-			class="org.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
+		<provider id="dk.sdu.mdsd.guilang.Guilang.editors.documentProviders"
+			class="dk.sdu.mdsd.guilang.ui.GuilangExecutableExtensionFactory:org.eclipse.xtext.ui.editor.model.XtextDocumentProvider"
 			extensions="gui,template,style">
 		</provider>
 	</extension>

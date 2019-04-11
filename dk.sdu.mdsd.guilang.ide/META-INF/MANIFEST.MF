@@ -10,6 +10,6 @@ Require-Bundle: dk.sdu.mdsd.guilang,
  org.eclipse.xtext.ide,
  org.eclipse.xtext.xbase.ide,
  org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
-Bundle-RequiredExecutionEnvironment: JavaSE-10
-Export-Package: org.sdu.mdsd.guilang.ide.contentassist.antlr,
- org.sdu.mdsd.guilang.ide.contentassist.antlr.internal
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: dk.sdu.mdsd.guilang.ide.contentassist.antlr.internal,
+ dk.sdu.mdsd.guilang.ide.contentassist.antlr
