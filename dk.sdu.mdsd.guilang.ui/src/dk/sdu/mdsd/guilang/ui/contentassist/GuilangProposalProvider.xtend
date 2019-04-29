@@ -3,6 +3,8 @@
  */
 package dk.sdu.mdsd.guilang.ui.contentassist
 
+import dk.sdu.mdsd.guilang.guilang.Specification
+import dk.sdu.mdsd.guilang.guilang.Specifications
 import dk.sdu.mdsd.guilang.guilang.Unit
 import dk.sdu.mdsd.guilang.guilang.impl.SpecificationImpl
 import dk.sdu.mdsd.guilang.guilang.impl.SpecificationsImpl
@@ -29,8 +31,8 @@ class GuilangProposalProvider extends AbstractGuilangProposalProvider {
 	// Filter out default suggestions // Currently not being triggered for Specifications proposals. Both child and parent objects do trigger.
 	override completeKeyword(Keyword keyword, ContentAssistContext contentAssistContext, ICompletionProposalAcceptor acceptor) {
 		switch(contentAssistContext.currentModel) {
-			case SpecificationImpl: return
-			case SpecificationsImpl: return
+			case Specification: return
+			case Specifications: return
 			default: super.completeKeyword(keyword, contentAssistContext, acceptor)
 		}
 	}
@@ -56,7 +58,7 @@ class GuilangProposalProvider extends AbstractGuilangProposalProvider {
 	
 	// This adds all nested entities to the proposals, but the default ones are still listed (including from other files)
 	override complete_Specification(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		println("Specification")
+		//println("Specification")
 		if(!(model instanceof SpecificationsImpl)) return; 
 		var unit = model.eContainer as Unit
 		val entities = getEntities(unit.layout).filter[e | e.name !== null]

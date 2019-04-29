@@ -1,9 +1,5 @@
 package dk.sdu.mdsd.guilang.generator.html
 
-import java.util.List
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
 import dk.sdu.mdsd.guilang.generator.GuilangGenerator
 import dk.sdu.mdsd.guilang.generator.ILanguageGenerator
 import dk.sdu.mdsd.guilang.guilang.Button
@@ -14,9 +10,12 @@ import dk.sdu.mdsd.guilang.guilang.Input
 import dk.sdu.mdsd.guilang.guilang.Label
 import dk.sdu.mdsd.guilang.guilang.Layout
 import dk.sdu.mdsd.guilang.guilang.SizeOption
-import dk.sdu.mdsd.guilang.guilang.TemplateInstance
 import dk.sdu.mdsd.guilang.guilang.TextArea
+import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.Vertical
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.generator.IFileSystemAccess2
+import org.eclipse.xtext.generator.IGeneratorContext
 
 class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 	
@@ -48,7 +47,7 @@ class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 				«ENDIF»
 			</head>
 			<body>
-				«gui.main.layout.generate»
+				«gui.main.contents.layout.generate»
 			</body>
 		</html>
 		'''
@@ -108,10 +107,10 @@ class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 		'''
 	}
 	
-	def dispatch generate(TemplateInstance entity) {
+	def dispatch generate(UnitInstance entity) {
 		'''
 		<div id="«entity.name»" class="template«getAdditionalClasses(entity)»">
-			«entity.ref.unit.layout.generate»
+			«entity.ref.contents.layout.generate»
 		</div>
 		'''
 	}

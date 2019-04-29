@@ -1,24 +1,16 @@
 package dk.sdu.mdsd.guilang.utils
 
-import java.util.HashMap
-import java.util.Map
 import dk.sdu.mdsd.guilang.guilang.Button
 import dk.sdu.mdsd.guilang.guilang.Checkbox
 import dk.sdu.mdsd.guilang.guilang.Entity
 import dk.sdu.mdsd.guilang.guilang.Horizontal
 import dk.sdu.mdsd.guilang.guilang.Input
 import dk.sdu.mdsd.guilang.guilang.Label
-import dk.sdu.mdsd.guilang.guilang.TemplateInstance
 import dk.sdu.mdsd.guilang.guilang.TextArea
+import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.Vertical
-import dk.sdu.mdsd.guilang.guilang.impl.ButtonImpl
-import dk.sdu.mdsd.guilang.guilang.impl.CheckboxImpl
-import dk.sdu.mdsd.guilang.guilang.impl.HorizontalImpl
-import dk.sdu.mdsd.guilang.guilang.impl.InputImpl
-import dk.sdu.mdsd.guilang.guilang.impl.LabelImpl
-import dk.sdu.mdsd.guilang.guilang.impl.TemplateInstanceImpl
-import dk.sdu.mdsd.guilang.guilang.impl.TextAreaImpl
-import dk.sdu.mdsd.guilang.guilang.impl.VerticalImpl
+import java.util.HashMap
+import java.util.Map
 
 class EntitySpecificationsProvider {
 	Map<Class<? extends Entity>, EntityOptionsCollection> specifications 
@@ -34,7 +26,7 @@ class EntitySpecificationsProvider {
 		var input = new EntityOptionsCollection(Input) 
 		var checkbox = new EntityOptionsCollection(Checkbox)
 		var textArea = new EntityOptionsCollection(TextArea)
-		var template = new EntityOptionsCollection(TemplateInstance)
+		var unitInstance = new EntityOptionsCollection(UnitInstance)
 		
 		// Define all possible options
 		var dimensions = new EntityOption("Dimension", "dimensions")
@@ -64,17 +56,17 @@ class EntitySpecificationsProvider {
 		specifications.put(Input, input);
 		specifications.put(Checkbox, checkbox);
 		specifications.put(TextArea, textArea);
-		specifications.put(TemplateInstance, template);
+		specifications.put(UnitInstance, unitInstance);
 		
 		// Crude fix for Impl versions
-		specifications.put(VerticalImpl, vertical);
-		specifications.put(HorizontalImpl, horizontal);
-		specifications.put(ButtonImpl, button);
-		specifications.put(LabelImpl, label);
-		specifications.put(InputImpl, input);
-		specifications.put(CheckboxImpl, checkbox);
-		specifications.put(TextAreaImpl, textArea);
-		specifications.put(TemplateInstanceImpl, template);
+//		specifications.put(VerticalImpl, vertical);
+//		specifications.put(HorizontalImpl, horizontal);
+//		specifications.put(ButtonImpl, button);
+//		specifications.put(LabelImpl, label);
+//		specifications.put(InputImpl, input);
+//		specifications.put(CheckboxImpl, checkbox);
+//		specifications.put(TextAreaImpl, textArea);
+//		specifications.put(TemplateInstanceImpl, template);
 	}
 	
 	def getSpecifications(Class<? extends Entity> type){

@@ -6,6 +6,7 @@ package dk.sdu.mdsd.guilang.scoping
 import com.google.inject.Inject
 import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.Unit
+import dk.sdu.mdsd.guilang.guilang.UnitContents
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
@@ -22,8 +23,23 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 	@Inject extension GuilangModelUtils
 
 	override IScope getScope(EObject context, EReference reference) {
+		//println("context:   " + context.toString.substring(context.toString.lastIndexOf('.')))
+		//println("reference: " + reference.containerClass.toString.substring(reference.containerClass.toString.lastIndexOf('.')))
 		if (context instanceof Specification) {
-			return getSpecificationScope(context as Specification)
+			var list = newArrayList
+			var scope = getSpecificationScope(context).allElements
+			var superScope = super.getScope(context, reference).allElements
+			
+			for(s : scope) {
+				list.add(s.EObjectOrProxy)
+			}
+			for(s : superScope) {
+				list.add(s.EObjectOrProxy)
+			}
+			
+			return Scopes.scopeFor(list)
+		} else if (context instanceof Unit) {
+			//return getFileScope(context)
 		}
 		super.getScope(context, reference)
 	}
@@ -31,9 +47,21 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 	// retrieves all entities from the containing unit and assigns them as scope
 	def private IScope getSpecificationScope(Specification spec) {
 		if(spec === null) return IScope.NULLSCOPE
-		var unit = spec.eContainer.eContainer as Unit
-		var entities = getEntities(unit.layout)
+//		if(spec.ref instanceof TemplateInstance) {
+//			return getNestedEntitySpecificationScope(spec)
+//		}
+		var contents = spec.eContainer.eContainer as UnitContents
+		var entities = getEntities(contents.layout)
 
 		return Scopes.scopeFor(entities)
+	}
+	
+	def private IScope getNestedEntitySpecificationScope(Specification spec) {
+		return IScope.NULLSCOPE;
+	}
+
+	def private IScope getFileScope(Unit unit) {
+		if(unit === null) return IScope.NULLSCOPE
+		return IScope.NULLSCOPE
 	}
 }

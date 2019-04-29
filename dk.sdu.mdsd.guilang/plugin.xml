@@ -3,7 +3,7 @@
 <plugin>
 	<extension point="org.eclipse.emf.ecore.generated_package">
 		<package 
-			uri = "http://www.sdu.org/mdsd/guilang/Guilang"
+			uri = "http://www.sdu.dk/mdsd/guilang/Guilang"
 			class = "dk.sdu.mdsd.guilang.guilang.GuilangPackage"
 			genModel = "model/generated/Guilang.genmodel" />
 	</extension>

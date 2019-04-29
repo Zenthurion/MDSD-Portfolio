@@ -1,11 +1,12 @@
 grammar dk.sdu.mdsd.guilang.Guilang with org.eclipse.xtext.common.Terminals
 
-generate guilang "http://www.sdu.org/mdsd/guilang/Guilang"
+generate guilang "http://www.sdu.dk/mdsd/guilang/Guilang"
 
 GUI:
 	debug?=Debug?
+	usings+=Using*
 	variables+=Variable*
-	main=Main
+	main=Main?
 	templates+=Template*
 ;
 
@@ -13,20 +14,27 @@ Debug:
 	'debug'
 ;
 
-Main returns Unit:
-	'main' Unit
+Using:
+	'use' ref=FQN
 ;
 
-Unit:
+Unit: Main | Template;
+
+Main returns Unit:
+	{Main} 'main' name=ID contents=UnitContents
+;
+
+Template returns Unit:
+	{Template} isPrivate?='private'? 'template' name=ID contents=UnitContents
+;
+
+UnitContents:
 	OPEN
 		layout=Layout
 		specifications=Specifications?
 	CLOSE
 ;
 
-Template:
-	'template' name=ID unit=Unit
-;
 
 Entity:
 	Layout | Element
@@ -46,7 +54,7 @@ Element:
 		{Input} key=('field' | 'input') | 
 		{Checkbox} key=('chk' | 'checkbox') |
 		{TextArea} key=('text-area') |
-		{TemplateInstance} (key?='new')? ref=[Template]
+		{UnitInstance} (key?='new')? ref=[Unit | FQN]
 	) name=ID
 ;
 
@@ -57,7 +65,7 @@ Specifications:
 ;
 
 Specification:
-	ref=[Entity] OPEN options+=Option* CLOSE
+	ref=[Entity | FQN]  OPEN options+=Option* CLOSE
 ;
 
 Option:
@@ -103,6 +111,10 @@ RequireBase returns Require:
 	'(' exp=Require ')' |
 	{Not} ('!' | 'NOT') exp=RequireBase |
 	{ElementRef} ref=[Element]
+;
+
+FQN:
+	ID ('.' ID)*
 ;
 
 terminal OPEN:

@@ -3,19 +3,23 @@
  */
 package dk.sdu.mdsd.guilang.generator
 
-import java.util.HashMap
-import java.util.List
-import java.util.Map
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.AbstractGenerator
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
+import com.google.inject.Inject
+import dk.sdu.mdsd.guilang.Debugger
 import dk.sdu.mdsd.guilang.generator.html.HTMLGenerator
 import dk.sdu.mdsd.guilang.guilang.Entity
 import dk.sdu.mdsd.guilang.guilang.GUI
 import dk.sdu.mdsd.guilang.guilang.Option
 import dk.sdu.mdsd.guilang.guilang.TextValue
-import dk.sdu.mdsd.guilang.guilang.impl.GUIImpl
+import java.util.HashMap
+import java.util.List
+import java.util.Map
+import org.eclipse.emf.ecore.EObject
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.generator.AbstractGenerator
+import org.eclipse.xtext.generator.IFileSystemAccess2
+import org.eclipse.xtext.generator.IGeneratorContext
+import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
+import dk.sdu.mdsd.guilang.guilang.GuilangPackage
 
 /**
  * Generates code from your model files on save.
@@ -24,6 +28,8 @@ import dk.sdu.mdsd.guilang.guilang.impl.GUIImpl
  */
 class GuilangGenerator extends AbstractGenerator {
 
+	@Inject extension Debugger
+	
 	protected Resource resource
 	protected IFileSystemAccess2 fsa
 	protected IGeneratorContext context
@@ -33,11 +39,28 @@ class GuilangGenerator extends AbstractGenerator {
 	protected String title
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
+		if(resource.allContents.filter(GUI).next.main === null) return;
+		
 		initialise(resource, fsa, context)
+		
+		printExportedObjects(resource)
+		
+		resource.allContents.forEach[o | o.debugObjects]
+		
 		
 		var ILanguageGenerator generator = new HTMLGenerator(resource, fsa, context)
 		
 		generator.generate()
+	}
+	
+	@Inject ResourceDescriptionsProvider rdp
+	def getResourceDescriptions(EObject o) {
+		val index = rdp.getResourceDescriptions(o.eResource)
+		index.getResourceDescription(o.eResource.URI)
+	}
+	def debugObjects(EObject o) {
+		println("Exports: " +o.resourceDescriptions.exportedObjects)
+		println("Exported Units: " + o.resourceDescriptions.getExportedObjectsByType(GuilangPackage.eINSTANCE.unit))
 	}
 	
 	def initialise(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
@@ -45,22 +68,24 @@ class GuilangGenerator extends AbstractGenerator {
 		this.fsa = fsa
 		this.context = context
 		
-		gui = resource.allContents.filter(GUIImpl).next
+		gui = resource.allContents.filter(GUI).next
 		populateEntityOptions()
 		title = getFileName(resource)
+		
+		
 	}
 	
 	def populateEntityOptions() {
 		entityOptions = new HashMap
-		
-		if(gui.main.specifications !== null){
-			for(spec : gui.main.specifications.list) {
+				
+		if(gui.main.contents.specifications !== null){
+			for(spec : gui.main.contents.specifications.list) {
 				entityOptions.put(spec.ref.name, spec.options)
 			}
 		
 		}
 		for(template : gui.templates) {
-			for(spec : template.unit.specifications.list) {
+			for(spec : template.contents.specifications.list) {
 				entityOptions.put(spec.ref.name, spec.options) // Likely candidate for ensuring  template field ids are concatenated with the template id  
 			}
 		}

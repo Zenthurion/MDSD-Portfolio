@@ -6,8 +6,8 @@ package dk.sdu.mdsd.guilang.validation
 import com.google.inject.Inject
 import dk.sdu.mdsd.guilang.guilang.Entity
 import dk.sdu.mdsd.guilang.guilang.GuilangPackage
+import dk.sdu.mdsd.guilang.guilang.Main
 import dk.sdu.mdsd.guilang.guilang.Specification
-import dk.sdu.mdsd.guilang.guilang.Template
 import dk.sdu.mdsd.guilang.utils.EntitySpecificationsProvider
 import org.eclipse.xtext.validation.Check
 
@@ -18,20 +18,11 @@ import org.eclipse.xtext.validation.Check
  */
 class GuilangValidator extends AbstractGuilangValidator {
 
-	@Inject extension EntitySpecificationsProvider	
+	@Inject extension EntitySpecificationsProvider		
 	
 	public static val INVALID_NAME = 'invalidName'
 	public static val INVALID_OPTION = 'invalidOption'
 
-//
-//	@Check
-//	def checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.name.charAt(0))) {
-//			warning('Name should start with a capital', 
-//					GuilangPackage.Literals.GREETING__NAME,
-//					INVALID_NAME)
-//		}
-//	}
 	@Check
 	def checkValidOptions(Specification spec) {
 		var correctOptions = getSpecifications(spec.ref.class)
@@ -54,12 +45,33 @@ class GuilangValidator extends AbstractGuilangValidator {
 	} 
 
 	@Check
-	def checkTemplateNamesStartWithCapital(Template template) {
-		if (!Character.isUpperCase(template.name.charAt(0))) {
-			warning("Template names should start with a capital letter", GuilangPackage.Literals.TEMPLATE__NAME,
+	def checkMainNameStartWithCapital(Main main) {
+		if (!Character.isUpperCase(main.name.charAt(0))) {
+			warning("Main name should start with a capital letter", GuilangPackage.Literals.UNIT__NAME,
 				INVALID_NAME)
 		}
 	}
+
+	
+
+	@Check
+	def checkMainNameMatchesFileName(Main main) {
+		var name = main.eResource.URI.path
+		name = name.subSequence(name.lastIndexOf("/") + 1, name.length - 4).toString
+		if (!name.equalsIgnoreCase(main.name)) {
+			warning("Main name should match the filename", GuilangPackage.Literals.UNIT__NAME,
+				INVALID_NAME)
+		}
+	}
+
+//
+//	@Check
+//	def checkTemplateNamesStartWithCapital(Template template) {
+//		if (!Character.isUpperCase(template.name.charAt(0))) {
+//			warning("Template names should start with a capital letter", GuilangPackage.Literals.UNIT_WRAPPER__NAME,
+//				INVALID_NAME)
+//		}
+//	}
 
 	@Check
 	def checkEntityNamesStartWithLowerCase(Entity entity) {
