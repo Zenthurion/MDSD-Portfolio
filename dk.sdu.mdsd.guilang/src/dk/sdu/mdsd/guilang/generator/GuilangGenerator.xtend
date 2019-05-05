@@ -14,6 +14,7 @@ import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.Unit
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
+import dk.sdu.mdsd.guilang.guilang.impl.SpecificationImpl
 import dk.sdu.mdsd.guilang.guilang.impl.SpecificationsImpl
 import dk.sdu.mdsd.guilang.guilang.impl.TextValueImpl
 import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceImpl
@@ -22,6 +23,8 @@ import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import java.util.HashMap
 import java.util.List
 import java.util.Map
+import org.eclipse.emf.common.util.BasicEList
+import org.eclipse.emf.common.util.EList
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.EcoreUtil2
@@ -53,9 +56,7 @@ class GuilangGenerator extends AbstractGenerator {
 
 		initialise(resource, fsa, context)
 
-		// printExportedObjects(resource)
-		// resource.allContents.forEach[o | o.debugObjects]
-		var ILanguageGenerator generator = new HTMLGenerator(resource, fsa, context)
+		val ILanguageGenerator generator = new HTMLGenerator(resource, fsa, context)
 
 		generator.generate()
 	}
@@ -113,7 +114,7 @@ class GuilangGenerator extends AbstractGenerator {
 	}
 
 	def getFileName(Resource resource) {
-		var uri = resource.URI.toString
+		val uri = resource.URI.toString
 		return uri.substring(uri.lastIndexOf('/') + 1, uri.length - 4)
 	}
 
@@ -123,14 +124,21 @@ class GuilangGenerator extends AbstractGenerator {
 		
 		var Specification specification
 		if(context.entity instanceof UnitInstanceImpl) {
-			specification = (context.options.findFirst[o|o instanceof UnitInstanceOption] as UnitInstanceOption).instanceSpecification
+			val option = context.options.findFirst[o|o instanceof UnitInstanceOption]
+			if(option ===  null) {
+				println(entity.name + ": trouble...") return ""
+			}
+			
+			if(option instanceof UnitInstanceOption) {
+				specification = option.instanceSpecification
+			}
 		} else {
 			specification = context
 		}
 		
 		if(specification.entity !== entity) return ""
 		
-		var option = specification.options.findFirst[o|o instanceof TextValueImpl] as TextValueImpl		
+		val option = specification.options.findFirst[o|o instanceof TextValueImpl] as TextValueImpl		
 		
 		return if(option === null) "" else (option as TextValueImpl).value
 	}
@@ -139,6 +147,18 @@ class GuilangGenerator extends AbstractGenerator {
 		mergeOverridesWithTemplate(unitInstance, unitInstance.unit)
 		return unitInstance
 	}
+	
+	def applySpecificationContext(Entity entity, Specification context) {
+		if(entity.name === 'top' || entity.name ==='bottom')
+		{
+			println("")
+		}
+		
+		if(context === null) return;
+		val existing = getSpecification(entity)
+		if(existing === null || existing === context) return; 
+		mergeSpecificationOptions(existing, context)
+	}
 
 	def mergeOverridesWithTemplate(UnitInstance unitInstance, Unit template) {
 		
@@ -146,9 +166,8 @@ class GuilangGenerator extends AbstractGenerator {
 		var overrideInstanceSpecification = unitInstance.instanceOverrideSpecification
 
 		if (overrideInstanceSpecification === null) {
-			overrideInstanceSpecification = new SpecificationImplCustom(unitInstance)
+			overrideInstanceSpecification = new SpecificationImplCustom(unitInstance) as SpecificationImpl
 			addSpecification(unitInstance, overrideInstanceSpecification)
-			return;
 		} 
 		for (overrideOption : overrideInstanceSpecification.options) {
 			if (overrideOption instanceof UnitInstanceOption) {
@@ -157,23 +176,6 @@ class GuilangGenerator extends AbstractGenerator {
 
 				mergeSpecificationOptions(overrideOption.instanceSpecification, template.contents.specifications.
 					list.findFirst[s|s.entity.name === currentEntity.name])
-
-			// val matchInTemplate = unitInstance.unit.contents.specifications.list.findFirst[s|print("existing [" + s.entity.name + "], ") s.entity.name === currentEntity.name]
-			// println()
-			// if(matchInTemplate !== null){
-			// println("Whoop!")
-			// for(templateOption : matchInTemplate.options) {
-			// val same = overrideOption.instanceSpecification.options.findFirst[instanceOption|instanceOption.class === templateOption.class]
-			// if(same !== null) {
-			// clone.unit.contents.specifications.list.remove(matchInTemplate)
-			// clone.unit.contents.specifications.list.add(overrideOption.instanceSpecification)
-			// } 
-			// }
-			// clone.unit.contents.specifications.list.remove(matchInTemplate)
-			// clone.unit.contents.specifications.list.add(overrideOption.instanceSpecification)
-			// } else {
-			//
-			// }
 			}
 		
 		}
@@ -181,34 +183,35 @@ class GuilangGenerator extends AbstractGenerator {
 
 	private def mergeSpecificationOptions(Specification overrideSpecification, Specification templateSpecification) {
 		if(templateSpecification === null) return;
-
+		if(templateSpecification === overrideSpecification) { println("Hmpff...") return}
+	
+		val EList<Option> toAdd = new BasicEList<Option>	
 		for (to : templateSpecification.options) {
 			val overrideOption = overrideSpecification.options.findFirst[oo|oo.class === to.class]
 			if (overrideOption === null) {
-				overrideSpecification.options.add(to)
-				println(EcoreUtil2.getContainerOfType(overrideSpecification, Unit).name + " > " + overrideSpecification.entity.name + " > " + overrideOption.class.toString.substring(overrideOption.class.toString.lastIndexOf('.') + 1) + " is using template values")
+				toAdd.add(to)
+				println(EcoreUtil2.getContainerOfType(overrideSpecification, Unit).name + " > " + overrideSpecification.entity.name + " > " + to.class.toString.substring(to.class.toString.lastIndexOf('.') + 1) + " is using template values")
 			} else {
 				println(EcoreUtil2.getContainerOfType(overrideSpecification, Unit).name + " > " + overrideSpecification.entity.name + " > " + overrideOption.class.toString.substring(overrideOption.class.toString.lastIndexOf('.') + 1) + " is overridden")
 			}
 		}
+		overrideSpecification.options.addAll(toAdd)
 	}
 
 	private def getInstanceOverrideSpecification(UnitInstance unitInstance) {
-		// var instanceContainer = EcoreUtil2.getContainerOfType(unitInstance, Unit)
-		// return EcoreUtil2.getAllContentsOfType(instanceContainer, Specification).findFirst[s|s.entity.name === unitInstance.name]
 		return getSpecification(unitInstance)
 	}
 	
 	def addSpecification(Entity entity, Specification specification) {
 		if(entity != specification.entity) return;
 		val instanceContainer = EcoreUtil2.getContainerOfType(entity, Unit)
-		val specifications = EcoreUtil2.getAllContentsOfType(instanceContainer, SpecificationsImpl).findFirst[]
+		val specifications = EcoreUtil2.getAllContentsOfType(instanceContainer, SpecificationsImpl).get(0)
 		specifications.list.add(specification)
 	}
 
 	def getSpecification(Entity entity) {
-		var instanceContainer = EcoreUtil2.getContainerOfType(entity, Unit)
-		var specification = EcoreUtil2.getAllContentsOfType(instanceContainer, Specification).findFirst [ s |
+		val instanceContainer = EcoreUtil2.getContainerOfType(entity, Unit)
+		val specification = EcoreUtil2.getAllContentsOfType(instanceContainer, Specification).findFirst [ s |
 			s.entity.name === entity.name
 		]
 		return specification

@@ -27,8 +27,6 @@ import org.eclipse.xtext.scoping.Scopes
  * on how and when to use it.
  */
 class GuilangScopeProvider extends AbstractGuilangScopeProvider {
-	@Inject extension GuilangModelUtils
-
 	override IScope getScope(EObject context, EReference reference) {
 		if (reference == GuilangPackage.Literals.SPECIFICATION__ENTITY) {
 			return getScopeForSpecificationEntity(context, reference)
@@ -46,14 +44,17 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 			if(context.basicGetEntity instanceof UnitInstanceImpl) { // Before the specification is written
 				return getEntitiesForSpecificationScope((context.entity as UnitInstanceImpl).unit)
 			} else if(context.eContainer instanceof UnitInstanceOptionImpl) { // After the specification is written
-				return getEntitiesForSpecificationScope(((context.eContainer.eContainer as SpecificationImpl).entity as UnitInstanceImpl).unit)
+				val entity = (context.eContainer.eContainer as SpecificationImpl).entity
+				if(entity instanceof UnitInstanceImpl) {
+					return getEntitiesForSpecificationScope(entity.unit)
+				}
 			}
 		} 
 		return getEntitiesForSpecificationScope(EcoreUtil2.getContainerOfType(context, Unit)) // For everything else
 	}
 	
 	def private IScope getEntitiesForSpecificationScope(Unit unit) {
-		var contents = EcoreUtil2.getAllContentsOfType(unit, Entity).filter[e|e.name !== null && e.name !== ""]
+		val contents = EcoreUtil2.getAllContentsOfType(unit, Entity).filter[e|e.name !== null && e.name !== ""]
 		return Scopes.scopeFor(contents)
 	}
 
@@ -64,49 +65,6 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 
 	def private IScope getScopeOptions(EObject context, EReference reference) {
 		println("--> " + context)
-		return IScope.NULLSCOPE
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// retrieves all entities from the containing unit and assigns them as scope
-	def private IScope getSpecificationScope(Specification spec) {
-		if(spec === null) return IScope.NULLSCOPE
-//		if(spec.ref instanceof TemplateInstance) {
-//			return getNestedEntitySpecificationScope(spec)
-//		}
-		var contents = if(spec.entity instanceof UnitInstance) ((spec.entity as UnitInstance).unit.contents) else (spec.
-				eContainer.eContainer as UnitContents)
-
-		var entities = getEntities(contents.layout)
-
-		return Scopes.scopeFor(entities)
-
-	}
-
-	def private IScope getNestedEntitySpecificationScope(Specification spec) {
-		return IScope.NULLSCOPE;
-	}
-
-	def private IScope getFileScope(Unit unit) {
-		if(unit === null) return IScope.NULLSCOPE
 		return IScope.NULLSCOPE
 	}
 }

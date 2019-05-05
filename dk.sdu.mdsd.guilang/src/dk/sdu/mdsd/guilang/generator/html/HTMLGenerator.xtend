@@ -91,12 +91,19 @@ class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 	}
 	
 	def dispatch generate(Button entity, Specification context) {
+		applySpecificationContext(entity, context)
+		val name = entity.name
+		val additional = getAdditionalClasses(entity)
+		val hasOptions = hasOption(entity, SizeOption)
+		val con = context.orLookup(entity)
+		val textVal = getTextValue(entity, con)
 		'''
-		<input type="button" id="«entity.name»" class="button«getAdditionalClasses(entity)»«IF !hasOption(entity, SizeOption)» medium«ENDIF»" value="«getTextValue(entity, context.orLookup(entity))»"></input>
+		<input type="button" id="«name»" class="button«additional»«IF !hasOptions» medium«ENDIF»" value="«textVal»"></input>
 		'''
 	}
 	
 	def dispatch generate(Label entity, Specification context) {
+		applySpecificationContext(entity, context)
 		val text = getTextValue(entity, context.orLookup(entity))
 		'''
 		<div id="«entity.name»" class="label«getAdditionalClasses(entity)»">«text»</div>
@@ -104,6 +111,7 @@ class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 	}
 	
 	def dispatch generate(Input entity, Specification context) {
+		applySpecificationContext(entity, context)
 		val text = getTextValue(entity, context.orLookup(entity))
 		'''
 		<input type="text" id="«entity.name»" class="input«getAdditionalClasses(entity)»" value="«text»"></input>
@@ -111,18 +119,21 @@ class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 	}
 	
 	def dispatch generate(Checkbox entity, Specification context) {
+		applySpecificationContext(entity, context)
 		'''
 		<input type="checkbox"" id="«entity.name»" class="checkbox«getAdditionalClasses(entity)»"></input>
 		'''
 	}
 	
 	def dispatch generate(TextArea entity, Specification context) {
+		applySpecificationContext(entity, context)
 		'''
 		<textarea cols="40" rows="5" id="«entity.name»" class="text-area«getAdditionalClasses(entity)»">«getTextValue(entity, context.orLookup(entity))»</textarea>
 		'''
 	}
 	
 	def dispatch generate(UnitInstance entity, Specification context) {
+		applySpecificationContext(entity, context)
 		mergeOverridesWithTemplate(entity, entity.unit)
 		'''
 		<div id="«entity.name»" class="template«getAdditionalClasses(entity)»">
