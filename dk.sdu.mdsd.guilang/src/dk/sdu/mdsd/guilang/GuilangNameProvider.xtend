@@ -6,10 +6,10 @@ import org.eclipse.xtext.naming.QualifiedName
 
 class GuilangNameProvider extends DefaultDeclarativeQualifiedNameProvider {
 
-	def protected QualifiedName qualifiedName(Template template){
-		var name = template.eResource.URI.trimFileExtension.lastSegment + "." + template.name
-		var qn = converter.toQualifiedName(name)
-		println(qn) 
-		return qn
-	}
+//	def protected QualifiedName qualifiedName(Template template){
+//		var name = template.eResource.URI.trimFileExtension.lastSegment + "." + template.name
+//		var qn = converter.toQualifiedName(name)
+//		println(qn) 
+//		return qn
+//	}
 }

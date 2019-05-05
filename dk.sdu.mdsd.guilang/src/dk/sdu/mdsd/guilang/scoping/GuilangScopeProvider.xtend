@@ -4,12 +4,19 @@
 package dk.sdu.mdsd.guilang.scoping
 
 import com.google.inject.Inject
+import dk.sdu.mdsd.guilang.guilang.Entity
+import dk.sdu.mdsd.guilang.guilang.GuilangPackage
 import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.Unit
 import dk.sdu.mdsd.guilang.guilang.UnitContents
+import dk.sdu.mdsd.guilang.guilang.UnitInstance
+import dk.sdu.mdsd.guilang.guilang.impl.SpecificationImpl
+import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceImpl
+import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceOptionImpl
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
 
@@ -23,26 +30,61 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 	@Inject extension GuilangModelUtils
 
 	override IScope getScope(EObject context, EReference reference) {
-		//println("context:   " + context.toString.substring(context.toString.lastIndexOf('.')))
-		//println("reference: " + reference.containerClass.toString.substring(reference.containerClass.toString.lastIndexOf('.')))
-		if (context instanceof Specification) {
-			var list = newArrayList
-			var scope = getSpecificationScope(context).allElements
-			var superScope = super.getScope(context, reference).allElements
-			
-			for(s : scope) {
-				list.add(s.EObjectOrProxy)
-			}
-			for(s : superScope) {
-				list.add(s.EObjectOrProxy)
-			}
-			
-			return Scopes.scopeFor(list)
-		} else if (context instanceof Unit) {
-			//return getFileScope(context)
-		}
-		super.getScope(context, reference)
+		if (reference == GuilangPackage.Literals.SPECIFICATION__ENTITY) {
+			return getScopeForSpecificationEntity(context, reference)
+		} else if (reference == GuilangPackage.Literals.SPECIFICATION__OPTIONS) {
+			return getScopeSpecificationOptions(context, reference) // Not seen triggered
+		} else if(reference == GuilangPackage.Literals.OPTION) {
+			return getScopeOptions(context, reference) // Not seen triggered
+		} 
+
+		return super.getScope(context, reference)
 	}
+
+	def private IScope getScopeForSpecificationEntity(EObject context, EReference reference) {
+		if(context instanceof SpecificationImpl) {	
+			if(context.basicGetEntity instanceof UnitInstanceImpl) { // Before the specification is written
+				return getEntitiesForSpecificationScope((context.entity as UnitInstanceImpl).unit)
+			} else if(context.eContainer instanceof UnitInstanceOptionImpl) { // After the specification is written
+				return getEntitiesForSpecificationScope(((context.eContainer.eContainer as SpecificationImpl).entity as UnitInstanceImpl).unit)
+			}
+		} 
+		return getEntitiesForSpecificationScope(EcoreUtil2.getContainerOfType(context, Unit)) // For everything else
+	}
+	
+	def private IScope getEntitiesForSpecificationScope(Unit unit) {
+		var contents = EcoreUtil2.getAllContentsOfType(unit, Entity).filter[e|e.name !== null && e.name !== ""]
+		return Scopes.scopeFor(contents)
+	}
+
+	def private IScope getScopeSpecificationOptions(EObject context, EReference reference) {
+		println("--> " + context)
+		return IScope.NULLSCOPE
+	}
+
+	def private IScope getScopeOptions(EObject context, EReference reference) {
+		println("--> " + context)
+		return IScope.NULLSCOPE
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	// retrieves all entities from the containing unit and assigns them as scope
 	def private IScope getSpecificationScope(Specification spec) {
@@ -50,12 +92,15 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 //		if(spec.ref instanceof TemplateInstance) {
 //			return getNestedEntitySpecificationScope(spec)
 //		}
-		var contents = spec.eContainer.eContainer as UnitContents
+		var contents = if(spec.entity instanceof UnitInstance) ((spec.entity as UnitInstance).unit.contents) else (spec.
+				eContainer.eContainer as UnitContents)
+
 		var entities = getEntities(contents.layout)
 
 		return Scopes.scopeFor(entities)
+
 	}
-	
+
 	def private IScope getNestedEntitySpecificationScope(Specification spec) {
 		return IScope.NULLSCOPE;
 	}

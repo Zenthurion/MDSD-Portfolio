@@ -9,6 +9,14 @@ import dk.sdu.mdsd.guilang.guilang.Label
 import dk.sdu.mdsd.guilang.guilang.TextArea
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.Vertical
+import dk.sdu.mdsd.guilang.guilang.impl.ButtonImpl
+import dk.sdu.mdsd.guilang.guilang.impl.CheckboxImpl
+import dk.sdu.mdsd.guilang.guilang.impl.HorizontalImpl
+import dk.sdu.mdsd.guilang.guilang.impl.InputImpl
+import dk.sdu.mdsd.guilang.guilang.impl.LabelImpl
+import dk.sdu.mdsd.guilang.guilang.impl.TextAreaImpl
+import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceImpl
+import dk.sdu.mdsd.guilang.guilang.impl.VerticalImpl
 import java.util.HashMap
 import java.util.Map
 
@@ -59,17 +67,18 @@ class EntitySpecificationsProvider {
 		specifications.put(UnitInstance, unitInstance);
 		
 		// Crude fix for Impl versions
-//		specifications.put(VerticalImpl, vertical);
-//		specifications.put(HorizontalImpl, horizontal);
-//		specifications.put(ButtonImpl, button);
-//		specifications.put(LabelImpl, label);
-//		specifications.put(InputImpl, input);
-//		specifications.put(CheckboxImpl, checkbox);
-//		specifications.put(TextAreaImpl, textArea);
-//		specifications.put(TemplateInstanceImpl, template);
+		specifications.put(VerticalImpl, vertical);
+		specifications.put(HorizontalImpl, horizontal);
+		specifications.put(ButtonImpl, button);
+		specifications.put(LabelImpl, label);
+		specifications.put(InputImpl, input);
+		specifications.put(CheckboxImpl, checkbox);
+		specifications.put(TextAreaImpl, textArea);
+		specifications.put(UnitInstanceImpl, unitInstance);
 	}
 	
 	def getSpecifications(Class<? extends Entity> type){
+		println("Type: " + type)
 		return specifications.getOrDefault(type, null)
 	}	
 }

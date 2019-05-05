@@ -2,23 +2,20 @@ grammar dk.sdu.mdsd.guilang.Guilang with org.eclipse.xtext.common.Terminals
 
 generate guilang "http://www.sdu.dk/mdsd/guilang/Guilang"
 
-GUI:
+Root:
 	debug?=Debug?
 	usings+=Using*
-	variables+=Variable*
 	main=Main?
 	templates+=Template*
 ;
 
-Debug: 
+Debug: // For debugging purposes in development
 	'debug'
 ;
 
 Using:
-	'use' ref=FQN
+	'use' importedNamespace=FQN ('as' localName=ID)?
 ;
-
-Unit: Main | Template;
 
 Main returns Unit:
 	{Main} 'main' name=ID contents=UnitContents
@@ -30,11 +27,11 @@ Template returns Unit:
 
 UnitContents:
 	OPEN
+		variables+=Variable*
 		layout=Layout
 		specifications=Specifications?
 	CLOSE
 ;
-
 
 Entity:
 	Layout | Element
@@ -42,42 +39,48 @@ Entity:
 
 Layout:
 	(
-		{Vertical} key=('vertical' | 'v') |
-		{Horizontal} key=('horizontal' | 'h')
+		{Vertical} ('vertical' | 'v') |
+		{Horizontal} ('horizontal' | 'h')
 	) name=ID? OPEN entities += Entity*	CLOSE
 ;
 
 Element: 
-	(
-		{Label} key=('lbl' | 'label') |
-		{Button} key=('btn' | 'button') | 
-		{Input} key=('field' | 'input') | 
-		{Checkbox} key=('chk' | 'checkbox') |
-		{TextArea} key=('text-area') |
-		{UnitInstance} (key?='new')? ref=[Unit | FQN]
-	) name=ID
+	(PrimitiveElement | UnitInstance) name=ID
+;
+
+PrimitiveElement returns Element:
+	{Label} ('lbl' | 'label') |
+	{Button} ('btn' | 'button') | 
+	{Input} ('field' | 'input') | 
+	{Checkbox} ('chk' | 'checkbox') |
+	{TextArea} ('text-area')
+;
+
+UnitInstance returns Element:
+	{UnitInstance} 'new'? unit=[Unit | FQN]
 ;
 
 Specifications:
-	{Specifications} 'elements' OPEN
+	{Specifications} 'specifications' OPEN
 		list+=Specification*
 	CLOSE
 ;
 
 Specification:
-	ref=[Entity | FQN]  OPEN options+=Option* CLOSE
+	{Specification} entity=[Entity | FQN]  OPEN options+=Option* CLOSE
 ;
 
 Option:
-	{DimOption} (key='dim' | key='dimensions') (width=INT'x'height=INT | ('w'| 'width') width=INT  ('h'| 'height') height=INT) |
-	{SizeOption} key='size' value=STRING |
-    {BackgroundColor} key='bg-color' (color=STRING | ref=[ColorVariable]) |
-	{TextColor} key='text-color' (color=STRING | ref=[ColorVariable]) |
-	{TextSize} key='text-size' value=INT unit=('px' | '%') |
-    {TextValue} key='text' value=STRING |
-    {TextValidate} key='validate' (value=RegexValidate | ref=[RegexVariable] | preset=PresetTextValidate) |
-    {CheckboxValidate} key='validate' (value='is-checked' | value='is-unchecked') |
-    {RequireElements} key='require' req=Require
+	{DimOption} ('dim' | 'dimensions') ('=' width=INT'x'height=INT | ('w'| 'width') '=' width=INT  ('h'| 'height') '=' height=INT) |
+	{SizeOption} 'size' '=' value=STRING |
+    {BackgroundColor} 'bg-color' '=' (color=STRING | ref=[ColorVariable]) |
+	{TextColor} 'text-color' '=' (color=STRING | ref=[ColorVariable]) |
+	{TextSize} 'text-size' '=' value=INT unit=('px' | '%') |
+    {TextValue} 'text' '=' value=STRING |
+    {TextValidate} 'validate' '=' (value=RegexValidate | ref=[RegexVariable] | preset=PresetTextValidate) |
+    {CheckboxValidate} 'validate' '=' (value='is-checked' | value='is-unchecked') |
+    {RequireElements} 'require' '=' req=Require |
+    {UnitInstanceOption} instanceSpecification=Specification
 ;
 
 Variable:

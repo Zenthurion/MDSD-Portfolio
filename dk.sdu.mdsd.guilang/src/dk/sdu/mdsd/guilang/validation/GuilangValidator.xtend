@@ -22,27 +22,27 @@ class GuilangValidator extends AbstractGuilangValidator {
 	
 	public static val INVALID_NAME = 'invalidName'
 	public static val INVALID_OPTION = 'invalidOption'
-
-	@Check
-	def checkValidOptions(Specification spec) {
-		var correctOptions = getSpecifications(spec.ref.class)
-		
-		var int index = 0
-		for (o : spec.options) {
-			var flag = false;
-			for (key : correctOptions.keys) {
-				if(o.key.equals(key)) {
-					flag = true;
-				}
-			}	
-			if(!flag) {
-				var type = spec.ref.class.canonicalName
-				type = type.substring(type.lastIndexOf('.') + 1, type.length - 4)
-				error('''"«o.key»" is not a valid key for an entity of type «type»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
-			}
-			index++
-		}
-	} 
+//
+//	@Check
+//	def checkValidOptions(Specification spec) {
+//		var correctOptions = getSpecifications(spec.ref.class)
+//		
+//		var int index = 0
+//		for (o : spec.options) {
+//			var flag = false;
+//			for (key : correctOptions.keys) {
+//				if(o.key.equals(key)) {
+//					flag = true;
+//				}
+//			}	
+//			if(!flag) {
+//				var type = spec.ref.class.canonicalName
+//				type = type.substring(type.lastIndexOf('.') + 1, type.length - 4)
+//				error('''"«o.key»" is not a valid key for an entity of type «type»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
+//			}
+//			index++
+//		}
+//	} 
 
 	@Check
 	def checkMainNameStartWithCapital(Main main) {

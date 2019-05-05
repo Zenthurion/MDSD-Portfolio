@@ -5,7 +5,7 @@ package dk.sdu.mdsd.guilang.ui.contentassist
 
 import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.Specifications
-import dk.sdu.mdsd.guilang.guilang.Unit
+import dk.sdu.mdsd.guilang.guilang.UnitContents
 import dk.sdu.mdsd.guilang.guilang.impl.SpecificationImpl
 import dk.sdu.mdsd.guilang.guilang.impl.SpecificationsImpl
 import dk.sdu.mdsd.guilang.utils.EntitySpecificationsProvider
@@ -29,42 +29,42 @@ class GuilangProposalProvider extends AbstractGuilangProposalProvider {
 	//@Inject extension GuilangGrammarAccess
 
 	// Filter out default suggestions // Currently not being triggered for Specifications proposals. Both child and parent objects do trigger.
-	override completeKeyword(Keyword keyword, ContentAssistContext contentAssistContext, ICompletionProposalAcceptor acceptor) {
-		switch(contentAssistContext.currentModel) {
-			case Specification: return
-			case Specifications: return
-			default: super.completeKeyword(keyword, contentAssistContext, acceptor)
-		}
-	}
+//	override completeKeyword(Keyword keyword, ContentAssistContext contentAssistContext, ICompletionProposalAcceptor acceptor) {
+//		switch(contentAssistContext.currentModel) {
+//			case Specification: return
+//			case Specifications: return
+//			default: super.completeKeyword(keyword, contentAssistContext, acceptor)
+//		}
+//	}
 	
-	override completeSpecifications_List(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		super.completeSpecifications_List(model, assignment, context, acceptor)
-	}
+//	override completeSpecifications_List(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		super.completeSpecifications_List(model, assignment, context, acceptor)
+//	}
 	
-	override complete_Specifications(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		super.complete_Specifications(model, ruleCall, context, acceptor)
-	}
+//	override complete_Specifications(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		super.complete_Specifications(model, ruleCall, context, acceptor)
+//	}
 	
 	// Add custom suggestions (complete_TheThingYouWant)
-	override complete_Option(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		if(!(model instanceof SpecificationImpl)) return
-		var spec = model as SpecificationImpl
-		var String[] options = getSpecifications(spec.ref.class).keys
-		
-		for(o : options) {
-			acceptor.accept(createCompletionProposal(o, context))
-		}
-	}
+//	override complete_Option(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		if(!(model instanceof SpecificationImpl)) return
+//		var spec = model as SpecificationImpl
+//		var String[] options = getSpecifications(spec.entity.class).keys
+//		
+//		for(o : options) {
+//			acceptor.accept(createCompletionProposal(o, context))
+//		}
+//	}
 	
 	// This adds all nested entities to the proposals, but the default ones are still listed (including from other files)
-	override complete_Specification(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
-		//println("Specification")
-		if(!(model instanceof SpecificationsImpl)) return; 
-		var unit = model.eContainer as Unit
-		val entities = getEntities(unit.layout).filter[e | e.name !== null]
-		
-		for(e : entities) {
-			acceptor.accept(createCompletionProposal(e.name, context))
-		}
-	}
+//	override complete_Specification(EObject model, RuleCall ruleCall, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
+//		//println("Specification")
+//		if(!(model instanceof SpecificationsImpl)) return; 
+//		var contents = model.eContainer as UnitContents
+//		val entities = getEntities(contents.layout).filter[e | e.name !== null]
+//		
+//		for(e : entities) {
+//			acceptor.accept(createCompletionProposal(e.name, context))
+//		}
+//	}
 }

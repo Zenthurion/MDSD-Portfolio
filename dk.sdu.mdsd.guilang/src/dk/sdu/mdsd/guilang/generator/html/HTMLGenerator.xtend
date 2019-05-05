@@ -1,5 +1,6 @@
 package dk.sdu.mdsd.guilang.generator.html
 
+import com.google.inject.Inject
 import dk.sdu.mdsd.guilang.generator.GuilangGenerator
 import dk.sdu.mdsd.guilang.generator.ILanguageGenerator
 import dk.sdu.mdsd.guilang.guilang.Button
@@ -10,14 +11,25 @@ import dk.sdu.mdsd.guilang.guilang.Input
 import dk.sdu.mdsd.guilang.guilang.Label
 import dk.sdu.mdsd.guilang.guilang.Layout
 import dk.sdu.mdsd.guilang.guilang.SizeOption
+import dk.sdu.mdsd.guilang.guilang.Specification
+import dk.sdu.mdsd.guilang.guilang.Specifications
 import dk.sdu.mdsd.guilang.guilang.TextArea
+import dk.sdu.mdsd.guilang.guilang.Unit
+import dk.sdu.mdsd.guilang.guilang.UnitContents
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
+import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
 import dk.sdu.mdsd.guilang.guilang.Vertical
+import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
+import org.eclipse.emf.common.util.BasicEList
+import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
 
 class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
+	
+	@Inject extension GuilangModelUtils
 	
 	var CSSGenerator css
 	
@@ -29,7 +41,7 @@ class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 	
 	override generate() {
 		fsa.generateFile(title + '.html', generateHTML())
-		if (gui.debug === false)
+		if (root.debug === false)
 		{
 			css.generate()			
 		}
@@ -40,20 +52,21 @@ class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 		<html>
 			<head>
 				<title>«title.toFirstUpper» GUI</title>
-				«IF gui.debug === false»
+				«IF root.debug === false»
 				<link rel="stylesheet" type="text/css" href="«title».css" />
 				«ELSE»
 				<style>«css.generateCSS»</style>
 				«ENDIF»
 			</head>
 			<body>
-				«gui.main.contents.layout.generate»
+				«root.main.contents.layout.generate(null)»
 			</body>
 		</html>
 		'''
 	}
 	
-	def generateLayout(Layout layout){
+	def generateLayout(Layout layout, Specification context){
+		
 		var String type
 		switch(layout) {
 			Vertical: type = "vertical"
@@ -61,58 +74,65 @@ class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
 		}
 		
 		'''
-		<div «IF layout.name !== null»id="«layout.name»" «ENDIF»class="«type»«getAdditionalClasses(layout)»">
+		<div «IF layout.name !== null && layout.name !== ""»id="«layout.name»" «ENDIF»class="«type»«getAdditionalClasses(layout)»">
 		«FOR e : layout.entities»
-			«e.generate»
+			«e.generate(context.orLookup(layout))»
 		«ENDFOR»
 		</div>
 		'''
 	}
 	
-	def dispatch generate(Vertical entity) {
-		return generateLayout(entity)
+	def dispatch generate(Vertical entity, Specification context) {
+		return generateLayout(entity, context)
 	}
 	
-	def dispatch generate(Horizontal entity) {
-		return generateLayout(entity)
+	def dispatch generate(Horizontal entity, Specification context) {
+		return generateLayout(entity, context)
 	}
 	
-	def dispatch generate(Button entity) {
+	def dispatch generate(Button entity, Specification context) {
 		'''
-		<input type="button" id="«entity.name»" class="button«getAdditionalClasses(entity)»«IF !hasOption(entity, SizeOption)» medium«ENDIF»" value="«getTextValue(entity)»"></input>
-		'''
-	}
-	
-	def dispatch generate(Label entity) {
-		'''
-		<div id="«entity.name»" class="label«getAdditionalClasses(entity)»">«getTextValue(entity)»</div>
+		<input type="button" id="«entity.name»" class="button«getAdditionalClasses(entity)»«IF !hasOption(entity, SizeOption)» medium«ENDIF»" value="«getTextValue(entity, context.orLookup(entity))»"></input>
 		'''
 	}
 	
-	def dispatch generate(Input entity) {
+	def dispatch generate(Label entity, Specification context) {
+		val text = getTextValue(entity, context.orLookup(entity))
 		'''
-		<input type="text" id="«entity.name»" class="input«getAdditionalClasses(entity)»">«getTextValue(entity)»</input>
+		<div id="«entity.name»" class="label«getAdditionalClasses(entity)»">«text»</div>
 		'''
 	}
 	
-	def dispatch generate(Checkbox entity) {
+	def dispatch generate(Input entity, Specification context) {
+		val text = getTextValue(entity, context.orLookup(entity))
+		'''
+		<input type="text" id="«entity.name»" class="input«getAdditionalClasses(entity)»" value="«text»"></input>
+		'''
+	}
+	
+	def dispatch generate(Checkbox entity, Specification context) {
 		'''
 		<input type="checkbox"" id="«entity.name»" class="checkbox«getAdditionalClasses(entity)»"></input>
 		'''
 	}
 	
-	def dispatch generate(TextArea entity) {
+	def dispatch generate(TextArea entity, Specification context) {
 		'''
-		<textarea cols="40" rows="5" id="«entity.name»" class="text-area«getAdditionalClasses(entity)»">«getTextValue(entity)»</textarea>
+		<textarea cols="40" rows="5" id="«entity.name»" class="text-area«getAdditionalClasses(entity)»">«getTextValue(entity, context.orLookup(entity))»</textarea>
 		'''
 	}
 	
-	def dispatch generate(UnitInstance entity) {
+	def dispatch generate(UnitInstance entity, Specification context) {
+		mergeOverridesWithTemplate(entity, entity.unit)
 		'''
 		<div id="«entity.name»" class="template«getAdditionalClasses(entity)»">
-			«entity.ref.contents.layout.generate»
+			«entity.unit.contents.layout.generate(getSpecification(entity))»
 		</div>
 		'''
+	}
+	
+	def orLookup(Specification s, Entity e){
+		return if (s !== null) s else getSpecification(e)
 	}
 	
 	def getAdditionalClasses(Entity entity) {

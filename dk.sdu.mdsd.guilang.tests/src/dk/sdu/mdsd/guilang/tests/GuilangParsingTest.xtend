@@ -4,7 +4,7 @@
 package dk.sdu.mdsd.guilang.tests
 
 import com.google.inject.Inject
-import dk.sdu.mdsd.guilang.guilang.GUI
+import dk.sdu.mdsd.guilang.guilang.Root
 import org.eclipse.xtext.testing.InjectWith
 import org.eclipse.xtext.testing.extensions.InjectionExtension
 import org.eclipse.xtext.testing.util.ParseHelper
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.^extension.ExtendWith
 @InjectWith(GuilangInjectorProvider)
 class GuilangParsingTest {
 	@Inject
-	ParseHelper<GUI> parseHelper
+	ParseHelper<Root> parseHelper
 	
 	@Test
 	def void loadModel() {
