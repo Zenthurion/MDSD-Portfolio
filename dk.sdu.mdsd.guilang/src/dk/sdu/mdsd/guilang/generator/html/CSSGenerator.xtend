@@ -1,44 +1,41 @@
 package dk.sdu.mdsd.guilang.generator.html
 
-import dk.sdu.mdsd.guilang.generator.ILanguageGenerator
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
+import com.google.inject.Inject
 import dk.sdu.mdsd.guilang.generator.GuilangGenerator
+import dk.sdu.mdsd.guilang.generator.ILanguageGenerator
 import dk.sdu.mdsd.guilang.guilang.BackgroundColor
 import dk.sdu.mdsd.guilang.guilang.DimOption
 import dk.sdu.mdsd.guilang.guilang.Option
 import dk.sdu.mdsd.guilang.guilang.TextColor
 import dk.sdu.mdsd.guilang.guilang.TextSize
 
-class CSSGenerator extends GuilangGenerator implements ILanguageGenerator {
+class CSSGenerator implements ILanguageGenerator {
 
-	new(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		initialise(resource, fsa, context)
+	val GuilangGenerator gen
+	
+	new(GuilangGenerator generator) {
+		gen = generator
 	}
 
 	override generate() {
-		fsa.generateFile(title + '.css', generateCSS())
+		gen.fsa.generateFile(gen.title + '.css', generateCSS())
 	}
 
 	def generateCSS() {
 		'''
 			«generateDefaults»
-			«FOR o : entityOptions.keySet»
-				«generateEntity(o)»
-			«ENDFOR»
 		'''
 	}
 
 	def generateEntity(String identifier) {
-		if(identifier === null || entityOptions.get(identifier) === null) return ""
-		'''
-			#«identifier» {
-				«FOR o : entityOptions.get(identifier)»
-					«o.generateOption»
-				«ENDFOR»
-			}
-		'''
+//		if(identifier === null || entityOverrides.get(identifier) === null) return ""
+//		'''
+//			#«identifier» {
+//				'''+ //«FOR o : entityOptions.get(identifier)»
+//					//«o.generateOption»
+//				 //«ENDFOR»
+//			'''}
+//		'''
 	}
 
 	def dispatch generateOption(Option option) {

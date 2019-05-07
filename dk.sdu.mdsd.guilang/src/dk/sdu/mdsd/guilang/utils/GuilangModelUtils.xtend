@@ -28,6 +28,10 @@ class GuilangModelUtils {
 		return list
 	}
 	
+	def hasName(Entity entity) {
+		return entity.name !== null && entity.name !== ""
+	}	
+	
 	static def <T extends EObject> T deepClone(T obj) {
 		var clone = EcoreUtil2.copy(obj)
 		switch(clone) {

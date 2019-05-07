@@ -3,17 +3,12 @@
  */
 package dk.sdu.mdsd.guilang.scoping
 
-import com.google.inject.Inject
 import dk.sdu.mdsd.guilang.guilang.Entity
 import dk.sdu.mdsd.guilang.guilang.GuilangPackage
-import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.Unit
-import dk.sdu.mdsd.guilang.guilang.UnitContents
-import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.impl.SpecificationImpl
 import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceImpl
 import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceOptionImpl
-import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2

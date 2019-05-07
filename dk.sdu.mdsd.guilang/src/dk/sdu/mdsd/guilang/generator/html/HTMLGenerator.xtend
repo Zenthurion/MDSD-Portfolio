@@ -9,151 +9,177 @@ import dk.sdu.mdsd.guilang.guilang.Entity
 import dk.sdu.mdsd.guilang.guilang.Horizontal
 import dk.sdu.mdsd.guilang.guilang.Input
 import dk.sdu.mdsd.guilang.guilang.Label
-import dk.sdu.mdsd.guilang.guilang.Layout
-import dk.sdu.mdsd.guilang.guilang.SizeOption
+import dk.sdu.mdsd.guilang.guilang.Root
 import dk.sdu.mdsd.guilang.guilang.Specification
-import dk.sdu.mdsd.guilang.guilang.Specifications
 import dk.sdu.mdsd.guilang.guilang.TextArea
 import dk.sdu.mdsd.guilang.guilang.Unit
-import dk.sdu.mdsd.guilang.guilang.UnitContents
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
 import dk.sdu.mdsd.guilang.guilang.Vertical
+import dk.sdu.mdsd.guilang.utils.GuilangEntitySpecifications
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
-import org.eclipse.emf.common.util.BasicEList
+import java.util.ArrayList
+import java.util.List
 import org.eclipse.emf.ecore.EObject
-import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
 
-class HTMLGenerator extends GuilangGenerator implements ILanguageGenerator {
+class HTMLGenerator implements ILanguageGenerator {
 	
-	@Inject extension GuilangModelUtils
+	@Inject extension GuilangEntitySpecifications specs
+	@Inject extension GuilangModelUtils utils
 	
-	var CSSGenerator css
+	val GuilangGenerator gen
+	val CSSGenerator css
+	val Root root
 	
-	new(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
-		initialise(resource, fsa, context)
-		
-		css = new CSSGenerator(resource, fsa, context)
+	new(GuilangGenerator generator) {
+		gen = generator
+		css = new CSSGenerator(gen)
+		root = gen.root
 	}
 	
 	override generate() {
-		fsa.generateFile(title + '.html', generateHTML())
-		if (root.debug === false)
+		if(specs === null) {
+			specs = new GuilangEntitySpecifications
+		}
+		if(utils === null) {
+			utils = new GuilangModelUtils
+		}
+		
+		gen.fsa.generateFile(gen.title + '.html', generateHTML())
+		if (gen.root.debug === false)
 		{
 			css.generate()			
 		}
 	}
 	
 	def generateHTML() {
+		val list = new ArrayList<Specification>
+		//list.add(root.main.contents.specifications)
 		'''
 		<html>
 			<head>
-				<title>«title.toFirstUpper» GUI</title>
+				<title>«gen.title.toFirstUpper» GUI</title>
 				«IF root.debug === false»
-				<link rel="stylesheet" type="text/css" href="«title».css" />
+				<link rel="stylesheet" type="text/css" href="«gen.title».css" />
 				«ELSE»
 				<style>«css.generateCSS»</style>
 				«ENDIF»
 			</head>
 			<body>
-				«root.main.contents.layout.generate(null)»
+				«root.main.generateUnitOrInstance(list)»
 			</body>
 		</html>
 		'''
 	}
 	
-	def generateLayout(Layout layout, Specification context){
+	def generateUnitOrInstance(EObject obj, List<Specification> specifications) {
+		val unit = if(obj instanceof Unit) obj else if(obj instanceof UnitInstance) obj.unit else null
 		
-		var String type
-		switch(layout) {
-			Vertical: type = "vertical"
-			Horizontal: type = "horizontal"
+		if(unit === null) {
+			println("Can't generate Unit or UnitInstance from " + obj)
+			return ""
 		}
 		
+		val relevant = specifications.filter[s|s.entity === obj]
+		val list = new ArrayList<Specification>()
+		if(relevant !== null) {
+			for(r : relevant) {
+				for(o : r.options) {
+					if(o instanceof UnitInstanceOption) {
+						list.add(o.instanceSpecification)
+					}
+				}
+			}
+		}
+		if(obj instanceof UnitInstance) {
+			val overrides = EcoreUtil2.getContainerOfType(obj, Unit)?.contents.specifications.list.filter[s|s.entity == obj]
+			if(overrides !== null)
+				list.addAll(overrides)
+		} 
+		list.addAll(unit.contents.specifications.list)
+		return unit.contents.layout.generate(list)
+	}
+	
+	def dispatch generate(Vertical layout, List<Specification> specifications) {
+		val hasName = hasName(layout)
 		'''
-		<div «IF layout.name !== null && layout.name !== ""»id="«layout.name»" «ENDIF»class="«type»«getAdditionalClasses(layout)»">
+		<div «IF hasName»id="«layout.name»" «ENDIF»class="vertical «layout.getAdditionalClasses(specifications)»">
 		«FOR e : layout.entities»
-			«e.generate(context.orLookup(layout))»
+			«e.generate(specifications)»
 		«ENDFOR»
 		</div>
 		'''
 	}
 	
-	def dispatch generate(Vertical entity, Specification context) {
-		return generateLayout(entity, context)
-	}
-	
-	def dispatch generate(Horizontal entity, Specification context) {
-		return generateLayout(entity, context)
-	}
-	
-	def dispatch generate(Button entity, Specification context) {
-		applySpecificationContext(entity, context)
-		val name = entity.name
-		val additional = getAdditionalClasses(entity)
-		val hasOptions = hasOption(entity, SizeOption)
-		val con = context.orLookup(entity)
-		val textVal = getTextValue(entity, con)
+	def dispatch generate(Horizontal layout, List<Specification> specifications) {
 		'''
-		<input type="button" id="«name»" class="button«additional»«IF !hasOptions» medium«ENDIF»" value="«textVal»"></input>
-		'''
-	}
-	
-	def dispatch generate(Label entity, Specification context) {
-		applySpecificationContext(entity, context)
-		val text = getTextValue(entity, context.orLookup(entity))
-		'''
-		<div id="«entity.name»" class="label«getAdditionalClasses(entity)»">«text»</div>
-		'''
-	}
-	
-	def dispatch generate(Input entity, Specification context) {
-		applySpecificationContext(entity, context)
-		val text = getTextValue(entity, context.orLookup(entity))
-		'''
-		<input type="text" id="«entity.name»" class="input«getAdditionalClasses(entity)»" value="«text»"></input>
-		'''
-	}
-	
-	def dispatch generate(Checkbox entity, Specification context) {
-		applySpecificationContext(entity, context)
-		'''
-		<input type="checkbox"" id="«entity.name»" class="checkbox«getAdditionalClasses(entity)»"></input>
-		'''
-	}
-	
-	def dispatch generate(TextArea entity, Specification context) {
-		applySpecificationContext(entity, context)
-		'''
-		<textarea cols="40" rows="5" id="«entity.name»" class="text-area«getAdditionalClasses(entity)»">«getTextValue(entity, context.orLookup(entity))»</textarea>
-		'''
-	}
-	
-	def dispatch generate(UnitInstance entity, Specification context) {
-		applySpecificationContext(entity, context)
-		mergeOverridesWithTemplate(entity, entity.unit)
-		'''
-		<div id="«entity.name»" class="template«getAdditionalClasses(entity)»">
-			«entity.unit.contents.layout.generate(getSpecification(entity))»
+		<div «IF layout.hasName»id="«layout.name»" «ENDIF»class="horizontal «layout.getAdditionalClasses(specifications)»">
+		«FOR e : layout.entities»
+			«e.generate(specifications)»
+		«ENDFOR»
 		</div>
 		'''
 	}
 	
-	def orLookup(Specification s, Entity e){
-		return if (s !== null) s else getSpecification(e)
+	def dispatch generate(Button button, List<Specification> specifications) {
+		'''
+		<input type="button" id="«button.name»" class="button«button.getAdditionalClasses(specifications)»«IF false» medium«ENDIF»" value="«button.getTextValue(specifications)»"></input>
+		'''
 	}
 	
-	def getAdditionalClasses(Entity entity) {
-		if(entity.name === null || entityOptions.get(entity.name)  === null) return ""
+	
+	
+//	def gen(EntityObject obj) {
+//		switch(obj.entity) {
+//			Label: 
+//				'''
+//				<div id="«obj.name»" class="label«getAdditionalClasses(obj.entity)»">«obj.text»</div>
+//				'''
+//			Button:
+//				'''
+//				<input type="button" id="«obj.name»" class="button" value="«obj.text»"></input>
+//				'''
+//		}
+//		
+//	}
+	
+	def dispatch generate(Label label, List<Specification> specifications) {
+		'''
+		<div id="«label.name»" class="label«label.getAdditionalClasses(specifications)»">«label.getTextValue(specifications)»</div>
+		'''
+	}
+	
+	def dispatch generate(Input input, List<Specification> specifications) {
+		'''
+		<input type="text" id="«input.name»" class="input«input.getAdditionalClasses(specifications)»" value="«input.getTextValue(specifications)»"></input>
+		'''
+	}
+	
+	def dispatch generate(Checkbox checkbox, List<Specification> specifications) {
+		'''
+		<input type="checkbox"" id="«checkbox.name»" class="checkbox«checkbox.getAdditionalClasses(specifications)»"></input>
+		'''
+	}
+	
+	def dispatch generate(TextArea textArea, List<Specification> specifications) {
+		'''
+		<textarea cols="40" rows="5" id="«textArea.name»" class="text-area«textArea.getAdditionalClasses(specifications)»">«textArea.getTextValue(specifications)»</textarea>
+		'''
+	}
+	
+	def dispatch generate(UnitInstance entity, List<Specification> specifications) {
+		return generateUnitOrInstance(entity, specifications)
+	}
+	
+	def getAdditionalClasses(Entity entity, List<Specification> specifications) {
+		//if(entity.name === null || entityOverrides.get(entity.name)  === null) return ""
 		var res = ""
-		for(o : entityOptions.get(entity.name)) {
-			switch(o) {
-				SizeOption: res += " " + o.value
-			}
-		}
+//		for(o : entityOptions.get(entity.name)) {
+//			switch(o) {
+//				SizeOption: res += " " + o.value
+//			}
+//		}
 		return res
 	}
 }

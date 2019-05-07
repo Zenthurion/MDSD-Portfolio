@@ -4,216 +4,64 @@
 package dk.sdu.mdsd.guilang.generator
 
 import com.google.inject.Inject
-import dk.sdu.mdsd.guilang.custom.impl.SpecificationImplCustom
 import dk.sdu.mdsd.guilang.generator.html.HTMLGenerator
 import dk.sdu.mdsd.guilang.guilang.Entity
-import dk.sdu.mdsd.guilang.guilang.GuilangPackage
-import dk.sdu.mdsd.guilang.guilang.Option
 import dk.sdu.mdsd.guilang.guilang.Root
-import dk.sdu.mdsd.guilang.guilang.Specification
-import dk.sdu.mdsd.guilang.guilang.Unit
-import dk.sdu.mdsd.guilang.guilang.UnitInstance
-import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
-import dk.sdu.mdsd.guilang.guilang.impl.SpecificationImpl
-import dk.sdu.mdsd.guilang.guilang.impl.SpecificationsImpl
-import dk.sdu.mdsd.guilang.guilang.impl.TextValueImpl
-import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceImpl
-import dk.sdu.mdsd.guilang.guilang.util.GuilangAdapterFactory
-import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
-import java.util.HashMap
+import dk.sdu.mdsd.guilang.guilang.Specifications
+import dk.sdu.mdsd.guilang.guilang.TextValue
+import dk.sdu.mdsd.guilang.utils.GuilangEntitySpecifications
 import java.util.List
-import java.util.Map
-import org.eclipse.emf.common.util.BasicEList
-import org.eclipse.emf.common.util.EList
-import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import org.eclipse.xtext.resource.impl.ResourceDescriptionsProvider
 
 /**
  * Generates code from your model files on save.
  * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#code-generation
  */
+ 
 class GuilangGenerator extends AbstractGenerator {
 
-	@Inject extension GuilangModelUtils
-	@Inject extension GuilangAdapterFactory
+	@Inject extension GuilangEntitySpecifications
 
-	protected Resource resource
-	protected IFileSystemAccess2 fsa
-	protected IGeneratorContext context
+	Resource resource
+	IFileSystemAccess2 fsa
+	IGeneratorContext context
 
-	protected Root root
-	protected Map<String, List<Option>> entityOptions
-	protected String title
+	Root root
+	String title
+	
+	def getResource(){
+		return resource 
+	}
+	def getFsa() {
+		return fsa
+	}
+	def getRoot() {
+		return root
+	}
+	def getTitle() {
+		return title
+	}
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		if(resource.allContents.filter(Root).next.main === null) return;
 
-		initialise(resource, fsa, context)
-
-		val ILanguageGenerator generator = new HTMLGenerator(resource, fsa, context)
-
-		generator.generate()
-	}
-
-	@Inject ResourceDescriptionsProvider rdp
-
-	def getResourceDescriptions(EObject o) {
-		val index = rdp.getResourceDescriptions(o.eResource)
-		index.getResourceDescription(o.eResource.URI)
-	}
-
-	def debugObjects(EObject o) {
-		println("Exports: " + o.resourceDescriptions.exportedObjects)
-		println("Exported Units: " + o.resourceDescriptions.getExportedObjectsByType(GuilangPackage.eINSTANCE.unit))
-	}
-
-	def initialise(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		this.resource = resource
 		this.fsa = fsa
 		this.context = context
 
 		root = resource.allContents.filter(Root).next
-		populateEntityOptions()
 		title = getFileName(resource)
-
-	}
-
-	def populateEntityOptions() {
-		entityOptions = new HashMap
-
-		if (root.main.contents.specifications !== null) {
-			for (spec : root.main.contents.specifications.list) {
-				entityOptions.put(spec.entity.name, spec.options)
-			}
-
-		}
-		for (template : root.templates) {
-			for (spec : template.contents.specifications.list) {
-				entityOptions.put(spec.entity.name, spec.options) // Likely candidate for ensuring  template field ids are concatenated with the template id  
-			}
-		}
-	}
-
-	def <T extends Option> T getOption(Entity entity, Class<T> type) {
-		if(!entityOptions.containsKey(entity.name)) return null
-		for (o : entityOptions.get(entity.name)) {
-			if (type.isInstance(o))
-				return o as T
-		}
-		return null
-	}
-
-	def <T extends Option> boolean hasOption(Entity entity, Class<T> type) {
-		return getOption(entity, type) !== null
+		
+		val ILanguageGenerator generator = new HTMLGenerator(this)
+		generator.generate()
 	}
 
 	def getFileName(Resource resource) {
 		val uri = resource.URI.toString
 		return uri.substring(uri.lastIndexOf('/') + 1, uri.length - 4)
-	}
-
-	def getTextValue(Entity entity, Specification context) {
-		if (context === null) 
-			return ""
-		
-		var Specification specification
-		if(context.entity instanceof UnitInstanceImpl) {
-			val option = context.options.findFirst[o|o instanceof UnitInstanceOption]
-			if(option ===  null) {
-				println(entity.name + ": trouble...") return ""
-			}
-			
-			if(option instanceof UnitInstanceOption) {
-				specification = option.instanceSpecification
-			}
-		} else {
-			specification = context
-		}
-		
-		if(specification.entity !== entity) return ""
-		
-		val option = specification.options.findFirst[o|o instanceof TextValueImpl] as TextValueImpl		
-		
-		return if(option === null) "" else (option as TextValueImpl).value
-	}
-
-	def getUnitInstanceCopy(UnitInstance unitInstance) {
-		mergeOverridesWithTemplate(unitInstance, unitInstance.unit)
-		return unitInstance
-	}
-	
-	def applySpecificationContext(Entity entity, Specification context) {
-		if(entity.name === 'top' || entity.name ==='bottom')
-		{
-			println("")
-		}
-		
-		if(context === null) return;
-		val existing = getSpecification(entity)
-		if(existing === null || existing === context) return; 
-		mergeSpecificationOptions(existing, context)
-	}
-
-	def mergeOverridesWithTemplate(UnitInstance unitInstance, Unit template) {
-		
-		
-		var overrideInstanceSpecification = unitInstance.instanceOverrideSpecification
-
-		if (overrideInstanceSpecification === null) {
-			overrideInstanceSpecification = new SpecificationImplCustom(unitInstance) as SpecificationImpl
-			addSpecification(unitInstance, overrideInstanceSpecification)
-		} 
-		for (overrideOption : overrideInstanceSpecification.options) {
-			if (overrideOption instanceof UnitInstanceOption) {
-				val overrideSpecification = overrideOption.instanceSpecification
-				val currentEntity = overrideSpecification.entity
-
-				mergeSpecificationOptions(overrideOption.instanceSpecification, template.contents.specifications.
-					list.findFirst[s|s.entity.name === currentEntity.name])
-			}
-		
-		}
-	}
-
-	private def mergeSpecificationOptions(Specification overrideSpecification, Specification templateSpecification) {
-		if(templateSpecification === null) return;
-		if(templateSpecification === overrideSpecification) { println("Hmpff...") return}
-	
-		val EList<Option> toAdd = new BasicEList<Option>	
-		for (to : templateSpecification.options) {
-			val overrideOption = overrideSpecification.options.findFirst[oo|oo.class === to.class]
-			if (overrideOption === null) {
-				toAdd.add(to)
-				println(EcoreUtil2.getContainerOfType(overrideSpecification, Unit).name + " > " + overrideSpecification.entity.name + " > " + to.class.toString.substring(to.class.toString.lastIndexOf('.') + 1) + " is using template values")
-			} else {
-				println(EcoreUtil2.getContainerOfType(overrideSpecification, Unit).name + " > " + overrideSpecification.entity.name + " > " + overrideOption.class.toString.substring(overrideOption.class.toString.lastIndexOf('.') + 1) + " is overridden")
-			}
-		}
-		overrideSpecification.options.addAll(toAdd)
-	}
-
-	private def getInstanceOverrideSpecification(UnitInstance unitInstance) {
-		return getSpecification(unitInstance)
-	}
-	
-	def addSpecification(Entity entity, Specification specification) {
-		if(entity != specification.entity) return;
-		val instanceContainer = EcoreUtil2.getContainerOfType(entity, Unit)
-		val specifications = EcoreUtil2.getAllContentsOfType(instanceContainer, SpecificationsImpl).get(0)
-		specifications.list.add(specification)
-	}
-
-	def getSpecification(Entity entity) {
-		val instanceContainer = EcoreUtil2.getContainerOfType(entity, Unit)
-		val specification = EcoreUtil2.getAllContentsOfType(instanceContainer, Specification).findFirst [ s |
-			s.entity.name === entity.name
-		]
-		return specification
 	}
 }
