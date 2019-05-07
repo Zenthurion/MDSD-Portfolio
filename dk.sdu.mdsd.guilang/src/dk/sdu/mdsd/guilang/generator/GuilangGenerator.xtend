@@ -23,28 +23,12 @@ import org.eclipse.xtext.generator.IGeneratorContext
  */
  
 class GuilangGenerator extends AbstractGenerator {
-
-	@Inject extension GuilangEntitySpecifications
-
 	Resource resource
 	IFileSystemAccess2 fsa
 	IGeneratorContext context
 
 	Root root
 	String title
-	
-	def getResource(){
-		return resource 
-	}
-	def getFsa() {
-		return fsa
-	}
-	def getRoot() {
-		return root
-	}
-	def getTitle() {
-		return title
-	}
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		if(resource.allContents.filter(Root).next.main === null) return;
@@ -63,5 +47,18 @@ class GuilangGenerator extends AbstractGenerator {
 	def getFileName(Resource resource) {
 		val uri = resource.URI.toString
 		return uri.substring(uri.lastIndexOf('/') + 1, uri.length - 4)
+	}
+	
+	def getResource(){
+		return resource 
+	}
+	def getFsa() {
+		return fsa
+	}
+	def getRoot() {
+		return root
+	}
+	def getTitle() {
+		return title
 	}
 }

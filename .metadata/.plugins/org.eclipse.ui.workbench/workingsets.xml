@@ -20,4 +20,5 @@
 <item elementID="=dk.sdu.mdsd.guilang.ui.tests/xtend-gen" factoryID="org.eclipse.jdt.ui.PersistableJavaElementFactory"/>
 </workingSet>
 <workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1554927871670_2" label="Window Working Set" name="Aggregate for window 1554927871670"/>
+<workingSet aggregate="true" factoryID="org.eclipse.ui.internal.WorkingSetFactory" id="1557232585755_3" label="Window Working Set" name="Aggregate for window 1557232585754"/>
 </workingSetManager>

@@ -1,10 +1,12 @@
 package dk.sdu.mdsd.guilang.utils
 
+import dk.sdu.mdsd.guilang.generator.EntityInstance
 import dk.sdu.mdsd.guilang.guilang.Entity
 import dk.sdu.mdsd.guilang.guilang.Option
 import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
 import dk.sdu.mdsd.guilang.guilang.impl.TextValueImpl
+import java.util.ArrayList
 import java.util.List
 
 class GuilangEntitySpecifications {
@@ -15,6 +17,15 @@ class GuilangEntitySpecifications {
 			if(res !== null) return res
 		}
 		
+		return null
+	}
+	
+	def <T extends Option> T getOption(EntityInstance instance, Class<T> type) {
+		for(o : instance.options) {
+			if(type.isInstance(o)) {
+				return o as T
+			} 
+		}
 		return null
 	}
 
@@ -29,6 +40,25 @@ class GuilangEntitySpecifications {
 		}
 		return null
 	}
+	
+	def <T extends Option> List<T> getUniqueOptions(Entity entity, List<Specification> specifications) {
+		val list = new ArrayList<T>
+		for (specification : specifications) {
+			addAllNestedUniqueOptions(entity, specification, list)
+		}
+		
+		return list
+	}
+	
+	private def <T extends Option> void addAllNestedUniqueOptions(Entity entity, Specification specification, List<T> accumulator) {
+		for (option : specification.options) {
+			if (specification.entity === entity && accumulator.findFirst[a|a.class === option.class] === null) { // Can't check for entity earlier as UnitInstanceOptions have them nested
+				accumulator.add(option as T)
+			} else if (option instanceof UnitInstanceOption) {
+				addAllNestedUniqueOptions(entity, option.instanceSpecification, accumulator)
+			}
+		}
+	}
 
 	def <T extends Option> boolean hasOption(Entity entity, List<Specification> containers, Class<T> type) {
 		return getOption(entity, containers, type) !== null
@@ -39,6 +69,12 @@ class GuilangEntitySpecifications {
 			return ""
 		
 		val textOption = getOption(entity, specifications, TextValueImpl)
+		
+		return if(textOption === null) "" else textOption.value
+	}
+
+	def getTextValue(EntityInstance instance) {
+		val textOption = getOption(instance, TextValueImpl)
 		
 		return if(textOption === null) "" else textOption.value
 	}

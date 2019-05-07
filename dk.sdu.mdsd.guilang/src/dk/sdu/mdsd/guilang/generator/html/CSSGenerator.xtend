@@ -1,128 +1,116 @@
 package dk.sdu.mdsd.guilang.generator.html
 
-import com.google.inject.Inject
+import dk.sdu.mdsd.guilang.generator.EntityInstance
 import dk.sdu.mdsd.guilang.generator.GuilangGenerator
 import dk.sdu.mdsd.guilang.generator.ILanguageGenerator
-import dk.sdu.mdsd.guilang.guilang.BackgroundColor
-import dk.sdu.mdsd.guilang.guilang.DimOption
 import dk.sdu.mdsd.guilang.guilang.Option
-import dk.sdu.mdsd.guilang.guilang.TextColor
-import dk.sdu.mdsd.guilang.guilang.TextSize
+import dk.sdu.mdsd.guilang.guilang.impl.BackgroundColorImpl
+import dk.sdu.mdsd.guilang.guilang.impl.DimOptionImpl
+import dk.sdu.mdsd.guilang.guilang.impl.TextColorImpl
+import dk.sdu.mdsd.guilang.guilang.impl.TextSizeImpl
+import java.util.ArrayList
 
 class CSSGenerator implements ILanguageGenerator {
 
 	val GuilangGenerator gen
+	val HTMLGenerator html
 	
-	new(GuilangGenerator generator) {
+	new(GuilangGenerator generator, HTMLGenerator html) {
 		gen = generator
+		this.html = html
 	}
 
-	override generate() {
-		gen.fsa.generateFile(gen.title + '.css', generateCSS())
+	override void generate() {
+		gen.fsa.generateFile(gen.title + '.css', generateCSS)
+		
+		gen.fsa.generateFile("defaults.css", generateDefaults)
 	}
 
 	def generateCSS() {
 		'''
-			«generateDefaults»
+		«FOR instance : html.entityInstances»
+			«instance.generate»
+		«ENDFOR»
 		'''
 	}
-
-	def generateEntity(String identifier) {
-//		if(identifier === null || entityOverrides.get(identifier) === null) return ""
-//		'''
-//			#«identifier» {
-//				'''+ //«FOR o : entityOptions.get(identifier)»
-//					//«o.generateOption»
-//				 //«ENDFOR»
-//			'''}
-//		'''
-	}
-
-	def dispatch generateOption(Option option) {
-		'''''' // Default non-generated option
-	}
-
-	def dispatch generateOption(TextColor option) {
-		'''
-			color: «option.color»;
-		'''
-	}
-
-	def dispatch generateOption(TextSize option) {
-		'''
-			size: «option.value»;
-		'''
-	}
-
-	def dispatch generateOption(BackgroundColor option) {
-		if (option.ref === null) {
-			'''
-				background-color: «option.color»;
-			'''
-		} else {
-			'''
-				background-color: «option.ref.value»;
-			'''
+	
+	def dispatch CharSequence generate(EntityInstance instance) {
+		val options = new ArrayList<CharSequence>
+		for(o : instance.options) {
+			val str = o.generate()
+			if(str !== null) options.add(str)
 		}
-
+		
+		if(options.size === 0) return '''''';
+		
+		'''
+		#«instance.identifier» {
+			«FOR o : options»
+				«o»
+			«ENDFOR»
+		}
+		'''
 	}
-
-	def dispatch generateOption(DimOption option) {
-		'''
-			width: «option.width»;
-			height: «option.height»;
-		'''
+	
+	def dispatch CharSequence generate(Option o) {
+		switch(o) {
+			TextColorImpl: '''color: «o.color»;'''
+			TextSizeImpl: '''font-size: «o.value + o.unit»;'''
+			BackgroundColorImpl: '''«IF o.ref === null»background-color: «o.color»;«ELSE»background-color: «o.ref.value»;«ENDIF»'''
+			DimOptionImpl: '''width: «o.width»;\nheight: «o.height»;'''
+			default: null
+		}
 	}
 
 	def generateDefaults() {
 		'''
-			body {
-				display: flex;
-				bjustify-content: center;
+			#main{
+				margin-top: 5px;
+				margin-bottom: 5px;
+				padding: 5px;
+				width: fit-content;
+			}
+			.element {
+				margin: 2px;
 			}
 			.vertical {
-				display: flex;
-				flex-direction: column;
-				width: fit-content;
+				width: 100%;
 				justify-content: center;
 			}
 			.horizontal {
-				display: flex;
-				flex-direction: row;
-				width: fit-content;
+				width: 100%;
 				justify-content: center;
 			}
 			.button {
-				text-align: center;
-				border: none;
-				margin: 2px;
+				width: 100%;
+				height: 100%;
 			}
 			.label {
-				margin-right: 10px;
+				width: 100%;
+				height: 100%;
+				font-size: 22px;
 			}
 			.input {
-				margin: 2px;
+				width: 100%;
+				height: 100%;
 			}
 			.checkbox {
-				
+				width: 100%;
+				height: 100%;
 			}
 			.text-area {
+				width: 100%;
+				height: 100%;
 				margin: 2px;
 			}
-			.template {
-				
-			}
-			.list {
-				
-			}
 			.small {
-				height: 20px;
-			}
-			.medium {
 				height: 40px;
 			}
+			.medium {
+				height: 50px;
+			}
 			.large {
-				height: 60px;
+				height: 70px;
 			}
 		'''
 	}
