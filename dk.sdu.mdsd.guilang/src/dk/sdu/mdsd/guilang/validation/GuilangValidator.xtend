@@ -10,6 +10,7 @@ import dk.sdu.mdsd.guilang.guilang.Main
 import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.utils.EntitySpecificationsProvider
 import org.eclipse.xtext.validation.Check
+import dk.sdu.mdsd.guilang.guilang.Template
 
 /**
  * This class contains custom validation rules. 
@@ -22,27 +23,25 @@ class GuilangValidator extends AbstractGuilangValidator {
 	
 	public static val INVALID_NAME = 'invalidName'
 	public static val INVALID_OPTION = 'invalidOption'
-//
-//	@Check
-//	def checkValidOptions(Specification spec) {
-//		var correctOptions = getSpecifications(spec.ref.class)
-//		
-//		var int index = 0
-//		for (o : spec.options) {
-//			var flag = false;
-//			for (key : correctOptions.keys) {
-//				if(o.key.equals(key)) {
-//					flag = true;
-//				}
-//			}	
-//			if(!flag) {
-//				var type = spec.ref.class.canonicalName
-//				type = type.substring(type.lastIndexOf('.') + 1, type.length - 4)
-//				error('''"«o.key»" is not a valid key for an entity of type «type»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
-//			}
-//			index++
-//		}
-//	} 
+
+	@Check
+	def checkValidOptions(Specification spec) {
+		var correctOptions = getSpecifications(spec.entity.class)
+		
+		var int index = 0
+		for (o : spec.options) {
+			var flag = false;
+			for (c : correctOptions) {
+				if(c.option.isInstance(o)) {
+					flag = true
+				}
+			}	
+			if(!flag) {
+				error('''"«o.class.shortName»" is not a valid option for an entity of type «spec.entity.class.shortName»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
+			}
+			index++
+		}
+	} 
 
 	@Check
 	def checkMainNameStartWithCapital(Main main) {
@@ -52,7 +51,10 @@ class GuilangValidator extends AbstractGuilangValidator {
 		}
 	}
 
-	
+	def private getShortName(Class<?> c) {
+		var res = c.canonicalName
+		return res.substring(res.lastIndexOf('.') + 1, res.length - 4)
+	}
 
 	@Check
 	def checkMainNameMatchesFileName(Main main) {
@@ -64,14 +66,14 @@ class GuilangValidator extends AbstractGuilangValidator {
 		}
 	}
 
-//
-//	@Check
-//	def checkTemplateNamesStartWithCapital(Template template) {
-//		if (!Character.isUpperCase(template.name.charAt(0))) {
-//			warning("Template names should start with a capital letter", GuilangPackage.Literals.UNIT_WRAPPER__NAME,
-//				INVALID_NAME)
-//		}
-//	}
+
+	@Check
+	def checkTemplateNamesStartWithCapital(Template template) {
+		if (!Character.isUpperCase(template.name.charAt(0))) {
+			warning("Template names should start with a capital letter", GuilangPackage.Literals.UNIT__NAME,
+				INVALID_NAME)
+		}
+	}
 
 	@Check
 	def checkEntityNamesStartWithLowerCase(Entity entity) {
