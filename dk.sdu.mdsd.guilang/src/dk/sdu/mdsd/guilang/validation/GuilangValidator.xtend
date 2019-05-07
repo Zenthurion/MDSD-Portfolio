@@ -14,6 +14,7 @@ import dk.sdu.mdsd.guilang.utils.EntitySpecificationsProvider
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import java.util.List
 import org.eclipse.xtext.validation.Check
+import dk.sdu.mdsd.guilang.guilang.Template
 
 /**
  * This class contains custom validation rules. 
@@ -45,7 +46,7 @@ class GuilangValidator extends AbstractGuilangValidator {
 				}
 			}	
 			if(!flag) {
-				error('''"«o.class.shortName»" is not a valid option for an entity of type «spec.entity.class.shortName»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
+				error('''"ï¿½o.class.shortNameï¿½" is not a valid option for an entity of type ï¿½spec.entity.class.shortNameï¿½''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
 			}
 			index++
 		}
@@ -55,7 +56,7 @@ class GuilangValidator extends AbstractGuilangValidator {
 //	def checkCircularUnitInstance(UnitInstance unitInstance) {
 //
 //		if(unitInstance.isNested(null)) {
-//			error('''Cyclic creation of Unit "«unitInstance.unit.name»" is not allowed''', 
+//			error('''Cyclic creation of Unit "ï¿½unitInstance.unit.nameï¿½" is not allowed''', 
 //						GuilangPackage.Literals.UNIT_INSTANCE__UNIT, 
 //						CYCLIC_UNIT, 
 //						unitInstance.unit.name)
@@ -82,6 +83,25 @@ class GuilangValidator extends AbstractGuilangValidator {
 //		
 //		return false
 //	}
+
+	@Check
+	def checkValidOptions(Specification spec) {
+		var correctOptions = getSpecifications(spec.entity.class)
+		
+		var int index = 0
+		for (o : spec.options) {
+			var flag = false;
+			for (c : correctOptions) {
+				if(c.option.isInstance(o)) {
+					flag = true
+				}
+			}	
+			if(!flag) {
+				error('''"ï¿½o.class.shortNameï¿½" is not a valid option for an entity of type ï¿½spec.entity.class.shortNameï¿½''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
+			}
+			index++
+		}
+	} 
 
 	@Check
 	def checkMainNameStartWithCapital(Main main) {
