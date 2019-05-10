@@ -57,7 +57,7 @@ PrimitiveElement returns Element:
 ;
 
 UnitInstance returns Element:
-	{UnitInstance} 'new'? unit=[Unit | FQN]
+	{UnitInstance} 'new'? unit=[Unit | ID]
 ;
 
 Specifications:

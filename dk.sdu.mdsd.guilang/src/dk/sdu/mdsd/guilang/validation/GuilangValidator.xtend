@@ -46,7 +46,7 @@ class GuilangValidator extends AbstractGuilangValidator {
 				}
 			}	
 			if(!flag) {
-				error('''"ï¿½o.class.shortNameï¿½" is not a valid option for an entity of type ï¿½spec.entity.class.shortNameï¿½''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
+				error('''«o.class.shortName» is not a valid option for an entity of type «spec.entity.class.shortName»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
 			}
 			index++
 		}
@@ -84,24 +84,6 @@ class GuilangValidator extends AbstractGuilangValidator {
 //		return false
 //	}
 
-	@Check
-	def checkValidOptions(Specification spec) {
-		var correctOptions = getSpecifications(spec.entity.class)
-		
-		var int index = 0
-		for (o : spec.options) {
-			var flag = false;
-			for (c : correctOptions) {
-				if(c.option.isInstance(o)) {
-					flag = true
-				}
-			}	
-			if(!flag) {
-				error('''"ï¿½o.class.shortNameï¿½" is not a valid option for an entity of type ï¿½spec.entity.class.shortNameï¿½''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
-			}
-			index++
-		}
-	} 
 
 	@Check
 	def checkMainNameStartWithCapital(Main main) {

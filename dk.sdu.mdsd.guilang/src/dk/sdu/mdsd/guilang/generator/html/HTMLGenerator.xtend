@@ -92,12 +92,15 @@ class HTMLGenerator implements ILanguageGenerator {
 		if(instance !== null) {
 			if(instance.entity instanceof UnitInstance) {				
 				relevant = getRelevantSpecifications(instance.entity, specifications) // find relevant from passed through specifications
-				relevant.addAll(unit.contents.specifications.list.filter[s|s.entity == instance.entity]) // find relevant from the current unit's context
+				if(unit.contents.specifications !== null && unit.contents.specifications.list !== null)
+					relevant.addAll(unit.contents.specifications.list.filter[s|s.entity !== null && s.entity == instance.entity]) // find relevant from the current unit's context
 			}
 		} else {
 			relevant = new ArrayList<Specification>
 		}
-		relevant.addAll(unit.contents.specifications.list)
+		
+		if(unit.contents.specifications !== null && unit.contents.specifications.list !== null)
+			relevant.addAll(unit.contents.specifications.list)
 			
 		return addInstance(unit.contents.layout, instance, relevant).generate(relevant)
 	}
