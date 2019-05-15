@@ -24,7 +24,7 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.impl.SimpleScope
 
 class ImprovedGuilangScopeProvider extends AbstractGuilangScopeProvider {
-	@Inject extension IQualifiedNameProvider nameProvider
+
 	override getScope(EObject context, EReference reference) {
 		if(reference == GuilangPackage.Literals.SPECIFICATION__ENTITY) 
 		{
@@ -47,16 +47,27 @@ class ImprovedGuilangScopeProvider extends AbstractGuilangScopeProvider {
 				return unit.nestedEntities("").asScope // Consider trying to add the name of the unit as namespace
 			}
 			SpecificationImpl: {
-				// Check for option?
 				if(context.eContainer instanceof UnitInstanceOption) {
-					
+					var parentSpecification = context.eContainer.eContainer as SpecificationImpl
+					if(parentSpecification.basicGetEntity instanceof UnitInstance) {
+						if(parentSpecification.entity !== null) {
+							var descriptions = (parentSpecification.entity as UnitInstance).unit.nestedEntities("")
+							var scope = descriptions.asScope
+							return scope
+						}
+					}
+				} else if(context.basicGetEntity instanceof UnitInstance) {
+					var descriptions = (context.entity as UnitInstance).unit.nestedEntities("")
+					var scope = descriptions.asScope
+					return scope
 				}
 				
 				val unit = EcoreUtil2.getContainerOfType(context.eContainer, Unit)
-				return unit.nestedEntities(unit.name).asScope // Consider trying to add the name of the unit as namespace
-//				if(context.entity === null) {
-//					return context.entity.nestedEntities("").asScope
-//				}
+				
+				var descriptions = unit.nestedEntities("")
+				var scope = descriptions.asScope
+				
+				return scope 
 			}
 			UnitInstanceOption:println("thing")
 		}
@@ -92,11 +103,18 @@ class ImprovedGuilangScopeProvider extends AbstractGuilangScopeProvider {
 			return null
 		}
 		val name = entity.qualifiedStringName(namespace)
-		val qualified = QualifiedName.create(name)
-		return new AliasedEObjectDescription(qualified, EObjectDescription.create(qualified, entity))
+		val seg = name.toSegmentedName
+		val qualified = QualifiedName.create(seg)
+				
+		//return new AliasedEObjectDescription(qualified, EObjectDescription.create(nameProvider.getFullyQualifiedName(entity), entity))
+		return EObjectDescription.create(qualified, entity)
 	}
 	
-	private def String qualifiedStringName(Entity entity, String namespace) {
+	private def qualifiedStringName(Entity entity, String namespace) {
 		return if (entity.name === null) namespace else if(namespace == "") entity.name else namespace + "." + entity.name
+	}
+	
+	private def String[] toSegmentedName(String name) {
+		return 	name.split("\\.")
 	}
 }

@@ -3,18 +3,8 @@ grammar dk.sdu.mdsd.guilang.Guilang with org.eclipse.xtext.common.Terminals
 generate guilang "http://www.sdu.dk/mdsd/guilang/Guilang"
 
 Root:
-	debug?=Debug?
-	usings+=Using*
 	main=Main?
 	templates+=Template*
-;
-
-Debug: // For debugging purposes in development
-	'debug'
-;
-
-Using:
-	'use' importedNamespace=FQN ('as' localName=ID)?
 ;
 
 Main returns Unit:
@@ -92,10 +82,10 @@ RegexValidate:
 	'regex' '=' value=STRING
 ;
 
-enum PresetTextValidate: // Consider replacing this with a library document with them listed as strings instead
-	password |
-	email |
-	not_empty
+enum PresetTextValidate:
+	val_password |
+	val_email |
+	val_not_empty
 ;
 
 Require:
