@@ -6,21 +6,17 @@ import java.util.ArrayList
 import java.util.List
 
 class EntityInstance {
-	Entity baseEntity
+	Entity entity
+	EntityInstance parentEntity
 	List<Option> options
 	String identifier
 	String namespace
 	
-	new(Entity entity, String identifierNamespace) {
-		baseEntity = entity
-		options = new ArrayList<Option>
-		namespace = identifierNamespace
-		identifier = if(baseEntity.name === null) null else (if(identifierNamespace === null || identifierNamespace == "") "" else identifierNamespace + "-") + baseEntity.name
-	}
-	
-	new (Entity entity, String identifierNamespace, List<Option> specifications) {
-		this(entity, identifierNamespace)
-		this.options.addAll(specifications)
+	new(Entity entity, EntityInstance parent, List<Option> options) {
+		this.entity = entity
+		this.options = options
+		namespace = if (parent === null) "" else parent.identifier
+		identifier = if(entity.name === null) null else (if(namespace === null || namespace == "") "" else namespace + "-") + entity.name
 	}
 	
 	def getIdentifier() {
@@ -30,7 +26,7 @@ class EntityInstance {
 		return namespace
 	}
 	def entity() {
-		return baseEntity
+		return entity
 	}
 	def getOptions() {
 		return options
@@ -41,5 +37,8 @@ class EntityInstance {
 	}
 	def hasIdentifier() {
 		return identifier !== null && identifier != ""
+	}
+	def getParent() {
+		return parentEntity
 	}
 }

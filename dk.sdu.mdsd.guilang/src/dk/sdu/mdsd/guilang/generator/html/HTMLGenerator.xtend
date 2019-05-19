@@ -219,7 +219,7 @@ class HTMLGenerator implements ILanguageGenerator {
 	
 	def addInstance(Entity entity, EntityInstance owner, List<Specification> specifications) {
 		var namespace = if(owner !== null) (if(owner.identifier === null) owner.namespace else owner.identifier) else ""
-		val instance = new EntityInstance(entity, namespace, getUniqueOptions(entity,specifications))
+		val instance = new EntityInstance(entity, owner, getUniqueOptions(entity,specifications))
 		entityInstances.add(instance)
 		return instance
 	}

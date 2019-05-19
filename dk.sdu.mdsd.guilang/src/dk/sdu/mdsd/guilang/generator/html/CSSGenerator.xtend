@@ -89,6 +89,7 @@ class CSSGenerator implements ILanguageGenerator {
 				width: 100%;
 				height: 100%;
 				font-size: 22px;
+				border: 1px solid black;
 			}
 			.input {
 				width: 100%;

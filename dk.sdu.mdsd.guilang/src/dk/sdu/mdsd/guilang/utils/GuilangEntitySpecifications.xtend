@@ -1,7 +1,9 @@
 package dk.sdu.mdsd.guilang.utils
 
 import dk.sdu.mdsd.guilang.generator.EntityInstance
+import dk.sdu.mdsd.guilang.guilang.DotRef
 import dk.sdu.mdsd.guilang.guilang.Entity
+import dk.sdu.mdsd.guilang.guilang.EntityRef
 import dk.sdu.mdsd.guilang.guilang.Option
 import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
@@ -49,6 +51,60 @@ class GuilangEntitySpecifications {
 		}
 		
 		return list
+	}
+	
+	private def <T extends Option> void addAllNestedUniqueOptions2(Entity entity, Specification specification, List<T> accumulator) {
+		for(option : specification.options) {
+			if(option instanceof UnitInstanceOption) {
+				addAllNestedUniqueOptions2(entity, option.instanceSpecification, accumulator)
+			} else {
+				val ref = specification.ref
+				var Entity entityRef
+				if(ref instanceof EntityRef) {
+					entityRef = ref.entity
+					
+				} else if (ref instanceof DotRef) {
+					entityRef = ref.tailEntity
+					// DotRef/DotRef/EntityRef
+					// Use this to collect specifications from nested DotRef instance
+//					for(e : ref.dotRefHierarchy) {
+//						
+//					}
+				}
+				if(entityRef === entity && accumulator.findFirst[a|a.class === option.class] === null) { // Checks if the option has an existing override
+					accumulator.add(option as T)
+				}			
+			}
+		}
+	}
+	
+	private def Entity getTailEntity(DotRef ref) {
+		var next = ref.ref
+		while(next instanceof DotRef) {
+			next = next.ref
+		}
+		return next.entity
+	}
+	
+	private def List<Entity> getDotRefHierarchy(DotRef ref) {
+		val list = new ArrayList<Entity>
+		list.add(ref.entity)
+		var next = ref.ref
+		while(next instanceof DotRef) {
+			list.add(next.entity)
+			next = next.ref
+		}
+		list.add(next.entity)
+		return list
+	}
+	
+	private def <T extends Option> void gatherDotRefSpecifications(DotRef dotRef, List<Option> accumulator) {
+		val next = dotRef.ref
+		if(next instanceof DotRef) {
+			next.gatherDotRefSpecifications(accumulator)
+		} else if(next instanceof EntityRef) {
+			
+		}
 	}
 	
 	private def <T extends Option> void addAllNestedUniqueOptions(Entity entity, Specification specification, List<T> accumulator) {

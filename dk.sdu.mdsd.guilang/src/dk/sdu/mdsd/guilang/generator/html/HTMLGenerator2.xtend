@@ -18,25 +18,25 @@ import dk.sdu.mdsd.guilang.guilang.Unit
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.Vertical
 import dk.sdu.mdsd.guilang.guilang.impl.LabelImpl
-import dk.sdu.mdsd.guilang.utils.GuilangEntitySpecifications
+import dk.sdu.mdsd.guilang.utils.GuilangEntitySpecifications3
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import java.util.ArrayList
 import java.util.List
 
 class HTMLGenerator2 implements ILanguageGenerator {
 	
-	@Inject extension GuilangEntitySpecifications specs
+	@Inject extension GuilangEntitySpecifications3 specs
 	@Inject extension GuilangModelUtils utils
 	
 	val GuilangGenerator gen
-	//val CSSGenerator css
+	val CSSGenerator css
 	val Root root
 	
 	val List<EntityInstance> entityInstances
 	
 	new(GuilangGenerator generator) {
 		gen = generator
-		//css = new CSSGenerator(gen, this)
+		css = new CSSGenerator(gen, this)
 		root = gen.root
 		
 		entityInstances = new ArrayList<EntityInstance>
@@ -44,13 +44,14 @@ class HTMLGenerator2 implements ILanguageGenerator {
 	
 	override generate() {
 		if(specs === null) {
-			specs = new GuilangEntitySpecifications
+			specs = new GuilangEntitySpecifications3
 		}
 		if(utils === null) {
 			utils = new GuilangModelUtils
 		}
 		
 		gen.fsa.generateFile(gen.title + '.html', generateHTML())
+		css.generate()	
 	}
 	
 	def generateHTML() { 
@@ -79,20 +80,21 @@ class HTMLGenerator2 implements ILanguageGenerator {
 		root.main.generateUnit(null, specifications)
 	}
 	
-	def CharSequence generateUnit(Unit unit, EntityInstance parentInstance, List<Specification> overrides) {
+	def CharSequence generateUnit(Unit unit, EntityInstance instance, List<Specification> overrides) {
 		val relevant = new ArrayList<Specification>
-		if(parentInstance !== null) {
-			val parentEntity = parentInstance.entity
-			if(parentEntity instanceof UnitInstance) {
+		if(instance !== null) { // It has to be a Main Unit if instance is null
+			if(instance.entity instanceof UnitInstance) { // Should never be anything else
 				// TODO: identify and add specifications nested within other specifications
+				val unitInstance = instance.entity as UnitInstance
+				relevant.addAll(unitInstance.getRelevantSpecifications(instance, overrides))
 			}
 		}
 		
 		if(unit.contents.specifications !== null && unit.contents.specifications.list !== null)
 			relevant.addAll(unit.contents.specifications.list)
 		
-		val instance = addInstance(unit.contents.layout, parentInstance, relevant)
-		return instance.generate(relevant)
+		val unitLayout = addInstance(unit.contents.layout, instance, relevant)
+		return unitLayout.generate(relevant)
 	}
 	
 	def CharSequence generate(EntityInstance instance, List<Specification> specifications) {
@@ -156,7 +158,7 @@ class HTMLGenerator2 implements ILanguageGenerator {
 	
 	def addInstance(Entity entity, EntityInstance owner, List<Specification> specifications) {
 		var namespace = if(owner !== null) (if(owner.identifier === null) owner.namespace else owner.identifier) else ""
-		val instance = new EntityInstance(entity, namespace, getUniqueOptions(entity,specifications))
+		val instance = new EntityInstance(entity, owner, getUniqueOptions(entity, owner, specifications))
 		entityInstances.add(instance)
 		return instance
 	}

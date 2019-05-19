@@ -12,11 +12,11 @@ import dk.sdu.mdsd.guilang.guilang.Specifications
 import dk.sdu.mdsd.guilang.guilang.Unit
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
+import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceImpl
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
-import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
 
@@ -59,9 +59,11 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 		} else if (context instanceof EntityRef){ // TODO: This appears to work
 			val unitInstanceOption = EcoreUtil2.getContainerOfType(context, UnitInstanceOption)
 			if(unitInstanceOption !== null) {
-				val unit = (unitInstanceOption.eContainer as Specification).ref.entity as UnitInstance
-				val entities = unit.getEntities
-				return Scopes.scopeFor(entities)
+				val entity = (unitInstanceOption.eContainer as Specification).ref.entity
+				if(entity instanceof UnitInstanceImpl) {
+					val entities = entity.getEntities
+					return Scopes.scopeFor(entities)
+				}
 			}
 			val entities = EcoreUtil2.getContainerOfType(context, Unit).getEntities
 			return Scopes.scopeFor(entities)
@@ -97,7 +99,7 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 				// Get options for the entity type
 			}
 		}
-		println("No scope...")
+		// No further scoping available. Should only occur when the entity is a primitive
 		return IScope.NULLSCOPE
 	}
 
