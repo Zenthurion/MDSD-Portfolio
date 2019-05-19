@@ -12,7 +12,7 @@ Main returns Unit:
 ;
 
 Template returns Unit:
-	{Template} isPrivate?='private'? 'template' name=ID contents=UnitContents
+	{Template} 'template' name=ID contents=UnitContents
 ;
 
 UnitContents:
@@ -50,14 +50,23 @@ UnitInstance returns Element:
 	{UnitInstance} 'new'? unit=[Unit | ID]
 ;
 
+DotRef returns Ref:
+	EntityRef ({DotRef.ref=current} '.' entity=[Entity])*
+;
+
+EntityRef returns Ref:
+	{EntityRef} entity=[Entity]
+;
+
+
 Specifications:
 	{Specifications} 'specifications' OPEN
 		list+=Specification*
 	CLOSE
 ;
 
-Specification:
-	{Specification} entity=[Entity | FQN]  OPEN options+=Option* CLOSE
+Specification:		
+	{Specification} ref=DotRef  (':' options+=Option | OPEN options+=Option* CLOSE)? // validate that DotExpression isn't ending in an option before adding more options, and conversely that if tail isn't option, a set of options must be provided
 ;
 
 Option:

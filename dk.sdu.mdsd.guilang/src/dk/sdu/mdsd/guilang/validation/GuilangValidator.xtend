@@ -35,21 +35,21 @@ class GuilangValidator extends AbstractGuilangValidator {
 	 */
 	@Check
 	def checkValidOptions(Specification spec) {
-		var correctOptions = getSpecifications(spec.entity.class)
-		
-		var int index = 0
-		for (o : spec.options) {
-			var flag = false;
-			for (c : correctOptions) {
-				if(c.option.isInstance(o)) {
-					flag = true
-				}
-			}	
-			if(!flag) {
-				error('''«o.class.shortName» is not a valid option for an entity of type «spec.entity.class.shortName»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
-			}
-			index++
-		}
+//		var correctOptions = getSpecifications(spec.entity.class)
+//		
+//		var int index = 0
+//		for (o : spec.options) {
+//			var flag = false;
+//			for (c : correctOptions) {
+//				if(c.option.isInstance(o)) {
+//					flag = true
+//				}
+//			}	
+//			if(!flag) {
+//				error('''«o.class.shortName» is not a valid option for an entity of type «spec.entity.class.shortName»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
+//			}
+//			index++
+//		}
 	} 
 	
 //	@Check

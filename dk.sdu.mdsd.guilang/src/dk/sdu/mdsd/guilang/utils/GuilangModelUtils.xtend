@@ -28,61 +28,69 @@ class GuilangModelUtils {
 		return list
 	}
 	
+	def List<Entity> getEntities(UnitInstance instance) {
+		return getEntities(instance.unit)
+	}
+	
+	def List<Entity> getEntities(Unit unit) {
+		return getEntities(unit.contents.layout)
+	}
+	
 	def hasName(Entity entity) {
 		return entity.name !== null && entity.name !== ""
 	}	
 	
-	static def <T extends EObject> T deepClone(T obj) {
-		var clone = EcoreUtil2.copy(obj)
-		switch(clone) {
-			Unit: {
-				clone.contents = deepClone(clone.contents)
-			}
-			UnitContents: {
-				clone.layout = deepClone(clone.layout)
-				clone.specifications = deepClone(clone.specifications)
-			}
-			Layout: {
-				var list = new BasicEList
-				for(e : clone.entities){
-					list.add(deepClone(e))
-				}
-				clone.entities.clear()
-				for(e : list){
-					clone.entities.add(e)
-				}
-			}
-			UnitInstance: {
-				clone.unit = deepClone(clone.unit)
-			}
-			Specifications: {
-				var list = new BasicEList
-				for(e : clone.list){
-					list.add(deepClone(e))
-				}
-				clone.list.clear()
-				for(e : list){
-					clone.list.add(e)
-				}
-			}
-			Specification: {
-				clone.entity = deepClone(clone.entity)
-				var list = new BasicEList
-				for(e : clone.options){
-					list.add(deepClone(e))
-				}
-				clone.options.clear()
-				for(e : list){
-					clone.options.add(e)
-				}
-			}
-			UnitInstanceOption: {
-				clone.instanceSpecification = deepClone(clone.instanceSpecification)
-			}
-			default: {
-				println("Deep clone implementation missing for " + obj + " shallow clone used instead")
-			}
-		}
-		return clone
-	}
+//	static def <T extends EObject> T deepClone(T obj) {
+//		var clone = EcoreUtil2.copy(obj)
+//		switch(clone) {
+//			Unit: {
+//				clone.contents = deepClone(clone.contents)
+//			}
+//			UnitContents: {
+//				clone.layout = deepClone(clone.layout)
+//				clone.specifications = deepClone(clone.specifications)
+//			}
+//			Layout: {
+//				var list = new BasicEList
+//				for(e : clone.entities){
+//					list.add(deepClone(e))
+//				}
+//				clone.entities.clear()
+//				for(e : list){
+//					clone.entities.add(e)
+//				}
+//			}
+//			UnitInstance: {
+//				clone.unit = deepClone(clone.unit)
+//			}
+//			Specifications: {
+//				var list = new BasicEList
+//				for(e : clone.list){
+//					list.add(deepClone(e))
+//				}
+//				clone.list.clear()
+//				for(e : list){
+//					clone.list.add(e)
+//				}
+//			}
+//			Specification: {
+//				clone.entity = deepClone(clone.entity)
+//				var list = new BasicEList
+//				for(e : clone.options){
+//					list.add(deepClone(e))
+//				}
+//				clone.options.clear()
+//				for(e : list){
+//					clone.options.add(e)
+//				}
+//			}
+//			UnitInstanceOption: {
+//				clone.instanceSpecification = deepClone(clone.instanceSpecification)
+//			}
+//			default: {
+//				println("Deep clone implementation missing for " + obj + " shallow clone used instead")
+//			}
+//		}
+//		return clone
+//	}
 }

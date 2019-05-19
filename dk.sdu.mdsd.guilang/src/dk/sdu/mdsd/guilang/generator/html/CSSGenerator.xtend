@@ -13,9 +13,9 @@ import java.util.ArrayList
 class CSSGenerator implements ILanguageGenerator {
 
 	val GuilangGenerator gen
-	val HTMLGenerator html
+	val HTMLGenerator2 html
 	
-	new(GuilangGenerator generator, HTMLGenerator html) {
+	new(GuilangGenerator generator, HTMLGenerator2 html) {
 		gen = generator
 		this.html = html
 	}

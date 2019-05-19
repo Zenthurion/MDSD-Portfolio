@@ -3,14 +3,8 @@
  */
 package dk.sdu.mdsd.guilang.generator
 
-import com.google.inject.Inject
-import dk.sdu.mdsd.guilang.generator.html.HTMLGenerator
-import dk.sdu.mdsd.guilang.guilang.Entity
+import dk.sdu.mdsd.guilang.generator.html.HTMLGenerator2
 import dk.sdu.mdsd.guilang.guilang.Root
-import dk.sdu.mdsd.guilang.guilang.Specifications
-import dk.sdu.mdsd.guilang.guilang.TextValue
-import dk.sdu.mdsd.guilang.utils.GuilangEntitySpecifications
-import java.util.List
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
@@ -40,7 +34,7 @@ class GuilangGenerator extends AbstractGenerator {
 		root = resource.allContents.filter(Root).next
 		title = getFileName(resource)
 		
-		val ILanguageGenerator generator = new HTMLGenerator(this)
+		val ILanguageGenerator generator = new HTMLGenerator2(this)
 		generator.generate()
 	}
 

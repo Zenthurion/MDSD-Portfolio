@@ -16,16 +16,14 @@ import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.TextArea
 import dk.sdu.mdsd.guilang.guilang.Unit
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
-import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
 import dk.sdu.mdsd.guilang.guilang.Vertical
 import dk.sdu.mdsd.guilang.guilang.impl.LabelImpl
 import dk.sdu.mdsd.guilang.utils.GuilangEntitySpecifications
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import java.util.ArrayList
 import java.util.List
-import org.eclipse.xtext.EcoreUtil2
 
-class HTMLGenerator implements ILanguageGenerator {
+class HTMLGenerator2 implements ILanguageGenerator {
 	
 	@Inject extension GuilangEntitySpecifications specs
 	@Inject extension GuilangModelUtils utils
@@ -53,9 +51,6 @@ class HTMLGenerator implements ILanguageGenerator {
 		}
 		
 		gen.fsa.generateFile(gen.title + '.html', generateHTML())
-
-		//css.generate()			
-		
 	}
 	
 	def generateHTML() { 
@@ -81,74 +76,23 @@ class HTMLGenerator implements ILanguageGenerator {
 	
 	def CharSequence generateInitial(Root root) {
 		val specifications = new ArrayList<Specification>
-		root.main.generateMainOrInstance(null, specifications)
+		root.main.generateUnit(null, specifications)
 	}
 	
-	def CharSequence generateMainOrInstance(Unit unit, EntityInstance instance, List<Specification> specifications) {
-		var List<Specification> relevant 
-		if(instance !== null) {
-			if(instance.entity instanceof UnitInstance) {				
-				relevant = getNestedSpecifications(instance.entity as UnitInstance, specifications) // find relevant from passed through specifications
-				//if(unit.contents.specifications !== null && unit.contents.specifications.list !== null) {
-					//val extra = unit.contents.specifications.list.filter[s|s.entity !== null && s.entity == instance.entity]
-					//relevant.addAll(extra) // find relevant from the current unit's context
-					//relevant.addAll(unit.getRelevantSpecificationsFrom(instance))
-					//relevant.addAll(instance.entity.getRelevantSpecifications(unit.contents.specifications.list))	
-				//}	
+	def CharSequence generateUnit(Unit unit, EntityInstance parentInstance, List<Specification> overrides) {
+		val relevant = new ArrayList<Specification>
+		if(parentInstance !== null) {
+			val parentEntity = parentInstance.entity
+			if(parentEntity instanceof UnitInstance) {
+				// TODO: identify and add specifications nested within other specifications
 			}
-		} else {
-			relevant = new ArrayList<Specification>
 		}
 		
 		if(unit.contents.specifications !== null && unit.contents.specifications.list !== null)
 			relevant.addAll(unit.contents.specifications.list)
-			
-		return addInstance(unit.contents.layout, instance, relevant).generate(relevant)
-	}
-	
-	def private List<Specification> getRelevantSpecificationsFrom(Unit unit, EntityInstance instance) {
-		val list = new ArrayList<Specification>
-		val specifications = unit.contents.specifications.list
 		
-		for(s : specifications) {
-			
-	 
-		}
-		return list
-	}
-	// WIP
-	def getRelevantSpecifications(Entity entity, List<Specification> specifications) {
-		//val relevant = specifications.filter[s|s.entity === entity]
-		val entities = EcoreUtil2.getAllContentsOfType(entity, Entity)
-		val list = new ArrayList<Specification>()
-		if(specifications !== null) {
-			for(s : specifications) {
-		// .ref is not correct (old had specification.entity)
-				if(entities.contains(s.ref)) {
-					for(o : s.options) {
-						if(o instanceof UnitInstanceOption) {
-							list.add(o.instanceSpecification)
-						}
-					}
-				}
-			}
-		}
-		return list
-	}
-
-	def List<Specification> getNestedSpecifications(UnitInstance entity, List<Specification> specifications) {
-		val specs = new ArrayList<Specification> 
-		// .ref is not correct (old had specification.entity)
-		specs.addAll(specifications.filter[s|s.ref === entity])
-		for(e : utils.getEntities(entity.unit.contents.layout)) {
-			if(e instanceof UnitInstance) {
-				specs.addAll(e.getNestedSpecifications(specifications))
-			} else {
-		// .ref is not correct (old had specification.entity)
-				specs.addAll(specifications.filter[s|s.ref == e])
-			}
-		}
-		return specs
+		val instance = addInstance(unit.contents.layout, parentInstance, relevant)
+		return instance.generate(relevant)
 	}
 	
 	def CharSequence generate(EntityInstance instance, List<Specification> specifications) {
@@ -159,7 +103,7 @@ class HTMLGenerator implements ILanguageGenerator {
 			UnitInstance:
 				'''
 				<div id=«instance.identifier»>
-					«generateMainOrInstance((instance.entity as UnitInstance).unit, instance, specifications)»
+					«generateUnit((instance.entity as UnitInstance).unit, instance, specifications)»
 				</div>
 				'''
 			Vertical: {
@@ -210,13 +154,6 @@ class HTMLGenerator implements ILanguageGenerator {
 		}
 	}
 	
-	def addPostScripts() {
-		'''
-		<scripts>
-		</scripts>
-		'''
-	}
-	
 	def addInstance(Entity entity, EntityInstance owner, List<Specification> specifications) {
 		var namespace = if(owner !== null) (if(owner.identifier === null) owner.namespace else owner.identifier) else ""
 		val instance = new EntityInstance(entity, namespace, getUniqueOptions(entity,specifications))
@@ -235,7 +172,15 @@ class HTMLGenerator implements ILanguageGenerator {
 		return classes.join(' ')
 	}
 	
+	def addPostScripts() {
+		'''
+		<scripts>
+		</scripts>
+		'''
+	}
+	
 	def getEntityInstances() {
 		return entityInstances
 	}
+	
 }

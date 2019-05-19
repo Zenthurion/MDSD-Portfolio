@@ -4,30 +4,21 @@
 package dk.sdu.mdsd.guilang.scoping
 
 import com.google.inject.Inject
-import dk.sdu.mdsd.guilang.guilang.Entity
+import dk.sdu.mdsd.guilang.guilang.DotRef
+import dk.sdu.mdsd.guilang.guilang.EntityRef
 import dk.sdu.mdsd.guilang.guilang.GuilangPackage
-import dk.sdu.mdsd.guilang.guilang.Layout
 import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.Specifications
 import dk.sdu.mdsd.guilang.guilang.Unit
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
-import dk.sdu.mdsd.guilang.guilang.impl.SpecificationImpl
-import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceImpl
-import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceOptionImpl
-import java.util.ArrayList
-import java.util.List
+import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.naming.IQualifiedNameProvider
-import org.eclipse.xtext.naming.QualifiedName
-import org.eclipse.xtext.resource.EObjectDescription
-import org.eclipse.xtext.resource.IEObjectDescription
-import org.eclipse.xtext.resource.impl.AliasedEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
-import org.eclipse.xtext.scoping.impl.SimpleScope
 
 /**
  * This class contains custom scoping description.
@@ -36,198 +27,104 @@ import org.eclipse.xtext.scoping.impl.SimpleScope
  * on how and when to use it.
  */
 class GuilangScopeProvider extends AbstractGuilangScopeProvider {
-	@Inject IQualifiedNameProvider nameProvider
-	
+	@Inject extension GuilangModelUtils
+
 	override IScope getScope(EObject context, EReference reference) {
-		if (reference == GuilangPackage.Literals.SPECIFICATION__ENTITY) 
-		{
-			return getScopeForSpecificationEntity2(context, reference)
-		} 
-		else if (reference == GuilangPackage.Literals.SPECIFICATION__OPTIONS) 
-		{
-			return getScopeSpecificationOptions(context, reference) // Not seen triggered
-		} 
-		else if(reference == GuilangPackage.Literals.OPTION) 
-		{
-			return getScopeOptions(context, reference) // Not seen triggered
-		} 
-		else if(reference == GuilangPackage.Literals.UNIT_INSTANCE__UNIT)
-		{
-			return super.getScope(context, reference) // Default allows use of units in separate files
-		} 
-		else if(reference == GuilangPackage.Literals.UNIT_INSTANCE_OPTION__INSTANCE_SPECIFICATION)
-		{
-			println("option") // Not seen triggered
-		} 
-		else if(reference == GuilangPackage.Literals.UNIT__NAME)
-		{
-			println("name") // Not seen triggered
-		} 
-		else if(reference == GuilangPackage.Literals.ELEMENT_REF__REF)
-		{
-			println("ref") // Not seen triggered
-		}
-		else if(reference == GuilangPackage.Literals.ENTITY__NAME)
-		{
-			println("ename") // Not seen triggered
-		}
-		else if(reference == GuilangPackage.Literals.ROOT__MAIN)
-		{
-			println("main") // Not seen triggered
-		}
-		else if(reference == GuilangPackage.Literals.UNIT__CONTENTS)
-		{
-			println("contents") // Not seen triggered
-		}
-		else if(reference == GuilangPackage.Literals.UNIT_CONTENTS__SPECIFICATIONS)
-		{
-			println("specifications") // Not seen triggered
-		}
-		else if(reference == GuilangPackage.Literals.UNIT_CONTENTS__LAYOUT)
-		{
-			println("layout") // Not seen triggered
-		}
-		else if(reference == GuilangPackage.Literals.SPECIFICATIONS__LIST)
-		{
-			println("list") // Not seen triggered
-		}
-		else if(reference == GuilangPackage.Literals.SPECIFICATION__ENTITY)
-		{
-			println("en") // Not seen triggered
+		if (reference === GuilangPackage.Literals.REF__ENTITY && context instanceof DotRef) {
+
+			return getDotRefTailScope(context, reference)
+
+		} else if (reference === GuilangPackage.Literals.DOT_REF__REF) {
+
+			println("ref")
+
+		} else if (reference === GuilangPackage.Literals.DOT_REF) {
+
+			println("raw")
+
+		} else if (reference === GuilangPackage.Literals.REF__ENTITY) {
+			
+			return getEntityRefEntityScope(context, reference)
+			
 		}
 
-		println("Using default scope > " + context + " <-> " + reference)
+		//println("Using default scope > " + context + " <-> " + reference)
 		return super.getScope(context, reference)
 	}
 	
-	def private IScope getScopeForUnitInstanceSpecification(Specification parent, String namespace) {
-		if(!(parent.eContainer instanceof UnitInstanceOption)) {
-			println("error...")
-		}
-		
-		val contents = EcoreUtil2.getAllContentsOfType(parent.entity, Entity).filter[e|e.name !== null && e.name !== ""]
-		var List<IEObjectDescription> nested = new ArrayList
-		
-		for(c : contents) {
-			val currentName = if (namespace == "") c.name else namespace + "." + c.name
-			val qn = QualifiedName.create(currentName)
-			//println(currentName)
-			nested.add(new AliasedEObjectDescription(qn, EObjectDescription.create(qn, c)))
-//			if(c instanceof UnitInstance) {
-//				nested.addAll(c.unit.getEntitiesForSpecificationScope(currentName))
-//			}
-		}
-		return new SimpleScope(IScope.NULLSCOPE, nested, false)
-	}
-
-
-	def private IScope getScopeForSpecificationEntity2(EObject context, EReference reference) {
-		val unit = EcoreUtil2.getContainerOfType(context, Unit)
-
-		var parentScope = Scopes.scopeFor(getParentScope(context))
-		var scope = getEntitiesForSpecificationScope(unit, "")
-		
-		return new SimpleScope(parentScope, scope)
-	}
-	
-	def private IScope getDefaultSpecificationsScope(Specifications specifications) {
-		var unit = EcoreUtil2.getContainerOfType(specifications, Unit)
-		var scope = EcoreUtil2.getAllContentsOfType(unit, Entity)
-		
-		return Scopes.scopeFor(scope)
-	}
-	
-	def private IScope getScopeForSpecificationEntity(EObject context, EReference reference) {
-		var List<IEObjectDescription> scope
-		if(context instanceof SpecificationImpl) {	
-			if(context.basicGetEntity instanceof UnitInstanceImpl) { // Before the specification is written
-				scope = getEntitiesForSpecificationScope((context.entity as UnitInstanceImpl).unit, context.entity.name)
-				print("-> this")	
-			} else if(context.eContainer instanceof UnitInstanceOptionImpl) { // After the specification is written
-				val entity = (context.eContainer.eContainer as SpecificationImpl).entity
-				if(entity instanceof UnitInstanceImpl) {
-					scope = getEntitiesForSpecificationScope(entity.unit, entity.name)
-					print("-> that")
+	def IScope getEntityRefEntityScope(EObject context, EReference reference) {
+		if(context instanceof Specifications) { // TODO: This appears to work
+			val entities = EcoreUtil2.getContainerOfType(context, Unit).getEntities
+			return Scopes.scopeFor(entities)
+		} else if (context instanceof EntityRef){ // TODO: This appears to work
+			val unitInstanceOption = EcoreUtil2.getContainerOfType(context, UnitInstanceOption)
+			if(unitInstanceOption !== null) {
+				val unit = (unitInstanceOption.eContainer as Specification).ref.entity as UnitInstance
+				val entities = unit.getEntities
+				return Scopes.scopeFor(entities)
+			}
+			val entities = EcoreUtil2.getContainerOfType(context, Unit).getEntities
+			return Scopes.scopeFor(entities)
+		} else if(context instanceof Specification) {
+			val ref = context.ref
+			println("specificaiton")
+			if(ref instanceof EntityRef) {
+				val entity = ref.entity
+				if(entity instanceof UnitInstance) {
+					val entities = entity.unit.getEntities
+					return Scopes.scopeFor(entities)
+				
+				} else {
+					val unitInstanceOption = EcoreUtil2.getContainerOfType(context, UnitInstanceOption)
+					if(unitInstanceOption !== null) {
+						if(entity !== null) {
+							return IScope.NULLSCOPE // This is a regular entity, so no further entities are in scope
+						}
+						val unit = (unitInstanceOption.eContainer as Specification).ref.entity as UnitInstance
+						val entities = unit.getEntities
+						return Scopes.scopeFor(entities)
+					} else if(entity !== null) {
+						return IScope.NULLSCOPE // This is a regular entity, so no further entities are in scope
+					}
+					println("confused")
+					val owner = EcoreUtil2.getContainerOfType(context, Unit)
+					val entities = owner.getEntities
+					return Scopes.scopeFor(entities)
 				}
-			}
-		} 
-		if(scope === null) {
-			scope = getEntitiesForSpecificationScope(EcoreUtil2.getContainerOfType(context, Unit), "") // For everything else
-			print("-> default")
-		}
-		println("[" + EcoreUtil2.getContainerOfType(context, Unit).name + "]")
-		return new SimpleScope(IScope.NULLSCOPE, scope, false)
-	}
-	
-	def private List<Entity> getParentScope(EObject context) {
-		var Unit unit
-		switch(context){
-			SpecificationImpl: {
-				if(context.basicGetEntity instanceof UnitInstance) {
-					unit = (context.entity as UnitInstance).unit
-				}
+			} else {
+				println("Nope")
+				
+				// Get options for the entity type
 			}
 		}
-		if(unit === null) {
-			unit = EcoreUtil2.getContainerOfType(context, Unit)
-		}
-		
-		val contents = EcoreUtil2.getAllContentsOfType(unit, Entity)
-		var nested = new ArrayList<Entity>
-		for(c : contents) {
-			nested.add(c)
-			if(c instanceof UnitInstance) {
-				nested.addAll(c.nestedEntities)
-			}
-			
-		}
-		return nested
-	}
-	
-	def private List<Entity> nestedEntities(Entity entity) {
-		var list = new ArrayList<Entity>
-		
-		if(entity instanceof Layout){
-			for(e : entity.entities) {
-				list.addAll(e.nestedEntities)
-			}
-		} else if (entity instanceof UnitInstance) {
-			for(e : entity.unit.contents.layout.entities) {
-				list.addAll(e.nestedEntities)
-			}
-		}
-		list.add(entity)
-		
-		return list
-	}
-	
-	def private List<IEObjectDescription> getEntitiesForSpecificationScope(Unit unit, String namespace) {
-		val contents = EcoreUtil2.getAllContentsOfType(unit, Entity)
-		var List<IEObjectDescription> nested = new ArrayList
-		
-		for(c : contents) {
-			
-			if(c.name !== null && c.name !== "") {
-				var currentName = if (namespace == "") c.name else namespace + "." + c.name
-			
-				val qn = QualifiedName.create(currentName)
-				//println("[" + EcoreUtil2.getContainerOfType(c, Unit).name + "] > " + currentName + " > " + c.name)
-				nested.add(new AliasedEObjectDescription(qn, EObjectDescription.create(c.name, c)))
-				if(c instanceof UnitInstance) {
-					nested.addAll(c.unit.getEntitiesForSpecificationScope(currentName))
-				}
-			}
-		}
-		return nested
-	}
-
-	def private IScope getScopeSpecificationOptions(EObject context, EReference reference) {
-		println("--> " + context)
+		println("No scope...")
 		return IScope.NULLSCOPE
 	}
 
-	def private IScope getScopeOptions(EObject context, EReference reference) {
-		println("--> " + context)
+	def IScope getDotRefTailScope(EObject context, EReference reference) {
+		if (context instanceof DotRef) { // TODO: This appears to work
+			var ref = context.ref
+			if (ref instanceof EntityRef) {
+				var entity = ref.entity
+				if (entity instanceof UnitInstance) {
+					//println("ref unit instance scope " + entity.name)
+					return Scopes.scopeFor(entity.getEntities)
+				} else {
+					//println("basic instance (nullscope) " + entity.name)
+					return IScope.NULLSCOPE
+				}
+			} else if (ref instanceof DotRef) {
+				var tail = ref.entity
+				if (tail instanceof UnitInstance) {
+					//println("tail unit instance scope " + tail.name)
+					return Scopes.scopeFor(tail.getEntities)
+				}
+			}
+		} else if (context instanceof EntityRef) {
+			println("entity")
+		}
+		println("No scope...")
 		return IScope.NULLSCOPE
 	}
+
 }

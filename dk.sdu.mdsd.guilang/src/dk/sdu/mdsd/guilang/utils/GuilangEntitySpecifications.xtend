@@ -31,7 +31,8 @@ class GuilangEntitySpecifications {
 
 	private def <T extends Option> T getNestedOption(Entity entity, Specification specification, Class<T> type) {
 		for (option : specification.options) {
-			if (specification.entity === entity && type.isInstance(option)) { // Can't check for entity earlier as UnitInstanceOptions have them nested
+			// specification.ref is not correct (old had specification.entity)
+			if (specification.ref === entity && type.isInstance(option)) { // Can't check for entity earlier as UnitInstanceOptions have them nested
 				return option as T;
 			} else if (option instanceof UnitInstanceOption) {
 				var res = getNestedOption(entity, option.instanceSpecification, type)
@@ -52,7 +53,8 @@ class GuilangEntitySpecifications {
 	
 	private def <T extends Option> void addAllNestedUniqueOptions(Entity entity, Specification specification, List<T> accumulator) {
 		for (option : specification.options) {
-			if (specification.entity === entity && accumulator.findFirst[a|a.class === option.class] === null) { // Can't check for entity earlier as UnitInstanceOptions have them nested
+			// specification.ref is not correct (old had specification.entity)
+			if (specification.ref === entity && accumulator.findFirst[a|a.class === option.class] === null) { // Can't check for entity earlier as UnitInstanceOptions have them nested
 				accumulator.add(option as T)
 			} else if (option instanceof UnitInstanceOption) {
 				addAllNestedUniqueOptions(entity, option.instanceSpecification, accumulator)
