@@ -12,9 +12,7 @@ import dk.sdu.mdsd.guilang.guilang.Template
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.utils.EntitySpecificationsProvider
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
-import java.util.List
 import org.eclipse.xtext.validation.Check
-import dk.sdu.mdsd.guilang.guilang.Template
 
 /**
  * This class contains custom validation rules. 
@@ -52,39 +50,15 @@ class GuilangValidator extends AbstractGuilangValidator {
 		}
 	} 
 	
-	// check this in scoping?
-//	@Check
-//	def checkCircularUnitInstance(UnitInstance unitInstance) {
-//
-//		if(unitInstance.isNested(null)) {
-//			error('''Cyclic creation of Unit «unitInstance.unit.name» is not allowed''', 
-//						GuilangPackage.Literals.UNIT_INSTANCE__UNIT, 
-//						CYCLIC_UNIT, 
-//						unitInstance.unit.name)
-//		}
-//			
-//		
-//	}
-//	
-//	private def boolean isNested(UnitInstance original, UnitInstance toCheck) {
-//		var nested = getEntities(if(toCheck === null) original.unit.contents.layout else toCheck.unit.contents.layout)
-//		println("Checking " + original.unit.name + " against " + toCheck.unit.name)
-//		for(instance : nested) {
-//			if(instance instanceof UnitInstance) {
-//				if(instance.unit.name == original.unit.name) {
-//					return true
-//				}
-//				else {
-//					if(original.isNested(toCheck)) {
-//						return true
-//					}
-//				}
-//			}
-//		}
-//		
-//		return false
-//	}
-
+	@Check
+	def checkCircularUnitInstance(UnitInstance unitInstance) {
+		if(unitInstance.unit.hasCyclicReference) {
+			error('''Cyclic creation of UnitInstance «unitInstance.unit.name» is not allowed''', 
+						GuilangPackage.Literals.UNIT_INSTANCE__UNIT, 
+						CYCLIC_UNIT, 
+						unitInstance.unit.name)
+		}	
+	}
 
 	@Check
 	def checkMainNameStartWithCapital(Main main) {
@@ -92,11 +66,6 @@ class GuilangValidator extends AbstractGuilangValidator {
 			warning("Main name should start with a capital letter", GuilangPackage.Literals.UNIT__NAME,
 				INVALID_NAME)
 		}
-	}
-
-	def private getShortName(Class<?> c) {
-		var res = c.canonicalName
-		return res.substring(res.lastIndexOf('.') + 1, res.length - 4)
 	}
 
 	@Check
@@ -108,7 +77,6 @@ class GuilangValidator extends AbstractGuilangValidator {
 				INVALID_NAME)
 		}
 	}
-
 
 	@Check
 	def checkTemplateNamesStartWithCapital(Template template) {

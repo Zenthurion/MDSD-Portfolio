@@ -5,16 +5,11 @@ package dk.sdu.mdsd.guilang.ui.contentassist
 
 import dk.sdu.mdsd.guilang.guilang.Specification
 import dk.sdu.mdsd.guilang.guilang.Specifications
-import dk.sdu.mdsd.guilang.guilang.UnitContents
-import dk.sdu.mdsd.guilang.guilang.impl.SpecificationImpl
-import dk.sdu.mdsd.guilang.guilang.impl.SpecificationsImpl
+import dk.sdu.mdsd.guilang.services.GuilangGrammarAccess
 import dk.sdu.mdsd.guilang.utils.EntitySpecificationsProvider
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
 import javax.inject.Inject
-import org.eclipse.emf.ecore.EObject
-import org.eclipse.xtext.Assignment
 import org.eclipse.xtext.Keyword
-import org.eclipse.xtext.RuleCall
 import org.eclipse.xtext.ui.editor.contentassist.ContentAssistContext
 import org.eclipse.xtext.ui.editor.contentassist.ICompletionProposalAcceptor
 
@@ -26,16 +21,18 @@ class GuilangProposalProvider extends AbstractGuilangProposalProvider {
 	
 	@Inject extension EntitySpecificationsProvider
 	@Inject extension GuilangModelUtils
-	//@Inject extension GuilangGrammarAccess
+	@Inject extension GuilangGrammarAccess grammarAccess
 
 	// Filter out default suggestions // Currently not being triggered for Specifications proposals. Both child and parent objects do trigger.
-//	override completeKeyword(Keyword keyword, ContentAssistContext contentAssistContext, ICompletionProposalAcceptor acceptor) {
-//		switch(contentAssistContext.currentModel) {
-//			case Specification: return
-//			case Specifications: return
-//			default: super.completeKeyword(keyword, contentAssistContext, acceptor)
-//		}
-//	}
+	override completeKeyword(Keyword keyword, ContentAssistContext contentAssistContext, ICompletionProposalAcceptor acceptor) {
+		switch(contentAssistContext.currentModel) {
+			case Specification: {
+				//if(grammarAccess.optionAccess.)
+				return
+			}
+		}
+		super.completeKeyword(keyword, contentAssistContext, acceptor)
+	}
 	
 //	override completeSpecifications_List(EObject model, Assignment assignment, ContentAssistContext context, ICompletionProposalAcceptor acceptor) {
 //		super.completeSpecifications_List(model, assignment, context, acceptor)

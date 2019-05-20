@@ -14,11 +14,15 @@ import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
 import dk.sdu.mdsd.guilang.guilang.impl.UnitInstanceImpl
 import dk.sdu.mdsd.guilang.utils.GuilangModelUtils
+import java.util.ArrayList
+import java.util.List
 import org.eclipse.emf.ecore.EObject
 import org.eclipse.emf.ecore.EReference
 import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.resource.IEObjectDescription
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
+import org.eclipse.xtext.scoping.impl.SimpleScope
 
 /**
  * This class contains custom scoping description.
@@ -38,11 +42,32 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 
 			return getEntityRefEntityScope(context, reference)
 
+		} else if (reference === GuilangPackage.Literals.UNIT_INSTANCE__UNIT) {
+			
+			return getUnitInstanceScope(context, reference)
+			
 		}
 
-		// println("Using default scope > " + context + " <-> " + reference)
+		//println("Using default scope > " + context + " <-> " + reference)
 		return super.getScope(context, reference)
 	}
+	
+	def IScope getUnitInstanceScope(EObject context, EReference reference) {
+		var scope = super.getScope(context, reference)
+		var elements = new ArrayList<IEObjectDescription>
+		elements.addAll(scope.allElements)
+		val filtered = new ArrayList<IEObjectDescription>
+		
+		for(e : elements) {
+			var obj = e.EObjectOrProxy
+			if((e.EObjectOrProxy instanceof Unit) && !(e.EObjectOrProxy as Unit).hasCyclicReference){
+				filtered.add(e)
+			}
+		}
+		
+		return new SimpleScope(filtered)
+	}
+	
 
 	def IScope getEntityRefEntityScope(EObject context, EReference reference) {
 		if (context instanceof Specifications) { // TODO: This appears to work
@@ -83,8 +108,6 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 					val entities = owner.getEntities
 					return Scopes.scopeFor(entities)
 				}
-			} else {
-				// Get options for the entity type
 			}
 		}
 		// No further scoping available. Should only occur when the entity is a primitive
@@ -94,17 +117,18 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 	def IScope getDotRefTailScope(EObject context, EReference reference) {
 		if (context instanceof DotRef) { // TODO: This appears to work
 			var ref = context.ref
+			val hierarchy = ref.hierarchy
 			if (ref instanceof EntityRef) {
 				var entity = ref.entity
 				if (entity instanceof UnitInstance) {
-					return Scopes.scopeFor(entity.getEntities)
+					return Scopes.scopeFor(entity.getEntities) // .filter[e|!hierarchy.contains(e)]
 				} else {
 					return IScope.NULLSCOPE
 				}
 			} else if (ref instanceof DotRef) {
 				var tail = ref.entity
 				if (tail instanceof UnitInstance) {
-					return Scopes.scopeFor(tail.getEntities)
+					return Scopes.scopeFor(tail.getEntities) // .filter[e|!hierarchy.contains(e)]
 				}
 			}
 		}
