@@ -34,68 +34,56 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 
 			return getDotRefTailScope(context, reference)
 
-		} else if (reference === GuilangPackage.Literals.DOT_REF__REF) {
-
-			println("ref")
-
-		} else if (reference === GuilangPackage.Literals.DOT_REF) {
-
-			println("raw")
-
 		} else if (reference === GuilangPackage.Literals.REF__ENTITY) {
-			
+
 			return getEntityRefEntityScope(context, reference)
-			
+
 		}
 
-		//println("Using default scope > " + context + " <-> " + reference)
+		// println("Using default scope > " + context + " <-> " + reference)
 		return super.getScope(context, reference)
 	}
-	
+
 	def IScope getEntityRefEntityScope(EObject context, EReference reference) {
-		if(context instanceof Specifications) { // TODO: This appears to work
+		if (context instanceof Specifications) { // TODO: This appears to work
 			val entities = EcoreUtil2.getContainerOfType(context, Unit).getEntities
 			return Scopes.scopeFor(entities)
-		} else if (context instanceof EntityRef){ // TODO: This appears to work
+		} else if (context instanceof EntityRef) { // TODO: This appears to work
 			val unitInstanceOption = EcoreUtil2.getContainerOfType(context, UnitInstanceOption)
-			if(unitInstanceOption !== null) {
+			if (unitInstanceOption !== null) {
 				val entity = (unitInstanceOption.eContainer as Specification).ref.entity
-				if(entity instanceof UnitInstanceImpl) {
+				if (entity instanceof UnitInstanceImpl) {
 					val entities = entity.getEntities
 					return Scopes.scopeFor(entities)
 				}
 			}
 			val entities = EcoreUtil2.getContainerOfType(context, Unit).getEntities
 			return Scopes.scopeFor(entities)
-		} else if(context instanceof Specification) {
+		} else if (context instanceof Specification) {
 			val ref = context.ref
-			println("specificaiton")
-			if(ref instanceof EntityRef) {
+			if (ref instanceof EntityRef) {
 				val entity = ref.entity
-				if(entity instanceof UnitInstance) {
+				if (entity instanceof UnitInstance) {
 					val entities = entity.unit.getEntities
 					return Scopes.scopeFor(entities)
-				
+
 				} else {
 					val unitInstanceOption = EcoreUtil2.getContainerOfType(context, UnitInstanceOption)
-					if(unitInstanceOption !== null) {
-						if(entity !== null) {
+					if (unitInstanceOption !== null) {
+						if (entity !== null) {
 							return IScope.NULLSCOPE // This is a regular entity, so no further entities are in scope
 						}
 						val unit = (unitInstanceOption.eContainer as Specification).ref.entity as UnitInstance
 						val entities = unit.getEntities
 						return Scopes.scopeFor(entities)
-					} else if(entity !== null) {
+					} else if (entity !== null) {
 						return IScope.NULLSCOPE // This is a regular entity, so no further entities are in scope
 					}
-					println("confused")
 					val owner = EcoreUtil2.getContainerOfType(context, Unit)
 					val entities = owner.getEntities
 					return Scopes.scopeFor(entities)
 				}
 			} else {
-				println("Nope")
-				
 				// Get options for the entity type
 			}
 		}
@@ -109,23 +97,17 @@ class GuilangScopeProvider extends AbstractGuilangScopeProvider {
 			if (ref instanceof EntityRef) {
 				var entity = ref.entity
 				if (entity instanceof UnitInstance) {
-					//println("ref unit instance scope " + entity.name)
 					return Scopes.scopeFor(entity.getEntities)
 				} else {
-					//println("basic instance (nullscope) " + entity.name)
 					return IScope.NULLSCOPE
 				}
 			} else if (ref instanceof DotRef) {
 				var tail = ref.entity
 				if (tail instanceof UnitInstance) {
-					//println("tail unit instance scope " + tail.name)
 					return Scopes.scopeFor(tail.getEntities)
 				}
 			}
-		} else if (context instanceof EntityRef) {
-			println("entity")
 		}
-		println("No scope...")
 		return IScope.NULLSCOPE
 	}
 

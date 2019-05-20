@@ -3,23 +3,10 @@
  */
 package dk.sdu.mdsd.guilang
 
-import com.google.inject.Binder
-import dk.sdu.mdsd.guilang.scoping.GuilangScopeProvider
-
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class GuilangRuntimeModule extends AbstractGuilangRuntimeModule {
 	
-	override configure(Binder binder) {
-		super.configure(binder)
-	}
-	
-	override bindIQualifiedNameProvider() {
-		return GuilangNameProvider
-	}
-	
-	override bindIScopeProvider() {
-		return GuilangScopeProvider
-	}
+
 }

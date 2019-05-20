@@ -1,139 +1,97 @@
 package dk.sdu.mdsd.guilang.utils
 
+import com.google.inject.Inject
 import dk.sdu.mdsd.guilang.generator.EntityInstance
-import dk.sdu.mdsd.guilang.guilang.DotRef
 import dk.sdu.mdsd.guilang.guilang.Entity
-import dk.sdu.mdsd.guilang.guilang.EntityRef
 import dk.sdu.mdsd.guilang.guilang.Option
+import dk.sdu.mdsd.guilang.guilang.Ref
 import dk.sdu.mdsd.guilang.guilang.Specification
+import dk.sdu.mdsd.guilang.guilang.UnitInstance
 import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
 import dk.sdu.mdsd.guilang.guilang.impl.TextValueImpl
 import java.util.ArrayList
 import java.util.List
 
 class GuilangEntitySpecifications {
+	@Inject extension GuilangModelUtils utils
 
-	def <T extends Option> T getOption(Entity entity, List<Specification> specifications, Class<T> type) {
-		for (specification : specifications) {
-			var res = getNestedOption(entity, specification, type)
-			if(res !== null) return res
-		}
-		
-		return null
-	}
-	
-	def <T extends Option> T getOption(EntityInstance instance, Class<T> type) {
-		for(o : instance.options) {
-			if(type.isInstance(o)) {
-				return o as T
-			} 
-		}
-		return null
+	new() {
+		utils = new GuilangModelUtils
 	}
 
-	private def <T extends Option> T getNestedOption(Entity entity, Specification specification, Class<T> type) {
-		for (option : specification.options) {
-			// specification.ref is not correct (old had specification.entity)
-			if (specification.ref === entity && type.isInstance(option)) { // Can't check for entity earlier as UnitInstanceOptions have them nested
-				return option as T;
-			} else if (option instanceof UnitInstanceOption) {
-				var res = getNestedOption(entity, option.instanceSpecification, type)
-				if(res !== null) return res
-			}
-		}
-		return null
-	}
-	
-	def <T extends Option> List<T> getUniqueOptions(Entity entity, List<Specification> specifications) {
-		val list = new ArrayList<T>
-		for (specification : specifications) {
-			addAllNestedUniqueOptions(entity, specification, list)
-		}
-		
-		return list
-	}
-	
-	private def <T extends Option> void addAllNestedUniqueOptions2(Entity entity, Specification specification, List<T> accumulator) {
-		for(option : specification.options) {
-			if(option instanceof UnitInstanceOption) {
-				addAllNestedUniqueOptions2(entity, option.instanceSpecification, accumulator)
-			} else {
-				val ref = specification.ref
-				var Entity entityRef
-				if(ref instanceof EntityRef) {
-					entityRef = ref.entity
-					
-				} else if (ref instanceof DotRef) {
-					entityRef = ref.tailEntity
-					// DotRef/DotRef/EntityRef
-					// Use this to collect specifications from nested DotRef instance
-//					for(e : ref.dotRefHierarchy) {
-//						
-//					}
+	def List<Specification> getRelevantSpecifications(UnitInstance unitInstance, EntityInstance owner,
+		List<Specification> existing) {
+		val relevant = new ArrayList<Specification>
+
+		for (specification : existing) {
+			for (entity : specification.ref.hierarchy) {
+				if (entity === unitInstance) {
+					for (option : specification.options) {
+						if (option instanceof UnitInstanceOption) {
+							relevant.add(option.instanceSpecification)
+						}
+					}
+					relevant.add(specification)
 				}
-				if(entityRef === entity && accumulator.findFirst[a|a.class === option.class] === null) { // Checks if the option has an existing override
-					accumulator.add(option as T)
-				}			
 			}
 		}
+
+		return relevant
 	}
-	
-	private def Entity getTailEntity(DotRef ref) {
-		var next = ref.ref
-		while(next instanceof DotRef) {
-			next = next.ref
+
+	def <T extends Option> List<T> getUniqueOptions(Entity entity, EntityInstance owner,
+		List<Specification> specifications) {
+		val options = new ArrayList<T>
+
+		for (specification : specifications) {
+			entity.addAllNestedUniqueOptions(owner, specification, options)
 		}
-		return next.entity
+
+		return options
 	}
-	
-	private def List<Entity> getDotRefHierarchy(DotRef ref) {
-		val list = new ArrayList<Entity>
-		list.add(ref.entity)
-		var next = ref.ref
-		while(next instanceof DotRef) {
-			list.add(next.entity)
-			next = next.ref
-		}
-		list.add(next.entity)
-		return list
-	}
-	
-	private def <T extends Option> void gatherDotRefSpecifications(DotRef dotRef, List<Option> accumulator) {
-		val next = dotRef.ref
-		if(next instanceof DotRef) {
-			next.gatherDotRefSpecifications(accumulator)
-		} else if(next instanceof EntityRef) {
-			
-		}
-	}
-	
-	private def <T extends Option> void addAllNestedUniqueOptions(Entity entity, Specification specification, List<T> accumulator) {
+
+	private def <T extends Option> void addAllNestedUniqueOptions(Entity entity, EntityInstance owner,
+		Specification specification, List<T> accumulator) {
 		for (option : specification.options) {
-			// specification.ref is not correct (old had specification.entity)
-			if (specification.ref === entity && accumulator.findFirst[a|a.class === option.class] === null) { // Can't check for entity earlier as UnitInstanceOptions have them nested
-				accumulator.add(option as T)
-			} else if (option instanceof UnitInstanceOption) {
-				addAllNestedUniqueOptions(entity, option.instanceSpecification, accumulator)
+			if (option instanceof UnitInstanceOption) {
+				entity.addAllNestedUniqueOptions(owner, option.instanceSpecification, accumulator)
+			} else {
+				if (entity.areSameInstance(owner, specification.ref)) {
+					if (accumulator.findFirst[a|a.class === option.class] === null) { // Checks if the option has an existing override
+						accumulator.add(option as T)
+					}
+				}
 			}
 		}
 	}
 
-	def <T extends Option> boolean hasOption(Entity entity, List<Specification> containers, Class<T> type) {
-		return getOption(entity, containers, type) !== null
+	private def boolean areSameInstance(Entity entity, EntityInstance owner, Ref ref) {
+		val references = ref.getHierarchy.reverse
+		val entities = entity.getHierarchy(owner).reverse
+
+		if (entities.size <= references.size) {
+			for (var i = 0; i < entities.size; i++) {
+				if (references.get(i) !== entities.get(i)) {
+					return false
+				}
+			}
+			return true
+		}
+		return false
 	}
 
-	def getTextValue(Entity entity, List<Specification> specifications) {
-		if (specifications === null) 
-			return ""
-		
-		val textOption = getOption(entity, specifications, TextValueImpl)
-		
-		return if(textOption === null) "" else textOption.value
+	def <T extends Option> T getOption(EntityInstance instance, Class<T> type) {
+		for (o : instance.options) {
+			if (type.isInstance(o)) {
+				return o as T
+			}
+		}
+		return null
 	}
 
 	def getTextValue(EntityInstance instance) {
 		val textOption = getOption(instance, TextValueImpl)
-		
+
 		return if(textOption === null) "" else textOption.value
 	}
 }

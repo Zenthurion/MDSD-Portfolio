@@ -13,35 +13,35 @@ import java.util.List
 class GuilangModelUtils {
 	def List<Entity> getEntities(Layout layout) {
 		var list = new ArrayList<Entity>()
-		
+
 		list.add(layout)
-		for(e : layout.entities) {
-			if(e instanceof Layout) 
+		for (e : layout.entities) {
+			if (e instanceof Layout)
 				list.addAll(getEntities(e))
-			else 
+			else
 				list.add(e)
 		}
 		return list
 	}
-	
+
 	def List<Entity> getEntities(UnitInstance instance) {
 		return getEntities(instance.unit)
 	}
-	
+
 	def List<Entity> getEntities(Unit unit) {
 		return getEntities(unit.contents.layout)
 	}
-	
+
 	def hasName(Entity entity) {
 		return entity.name !== null && entity.name !== ""
-	}	
-	
+	}
+
 	def List<Entity> getHierarchy(Ref ref) {
 		val list = new ArrayList<Entity>
 		list.add(ref.entity)
-		if(ref instanceof DotRef) {
+		if (ref instanceof DotRef) {
 			var next = ref.ref
-			while(next instanceof DotRef) {
+			while (next instanceof DotRef) {
 				list.add(next.entity)
 				next = next.ref
 			}
@@ -49,23 +49,23 @@ class GuilangModelUtils {
 		}
 		return list.reverse
 	}
-	
+
 	def List<Entity> getHierarchy(Entity entity, EntityInstance owner) {
 		val list = new ArrayList<Entity>
 		list.add(entity)
 		var parent = owner
-		
-		while(parent !== null) {
-			if(!(parent.entity instanceof Layout)) {
+
+		while (parent !== null) {
+			if (!(parent.entity instanceof Layout)) {
 				list.add(parent.entity)
 			}
-			
+
 			parent = parent.parent
 		}
-		
+
 		return list.reverse
 	}
-	
+
 	def Entity getTailEntity(DotRef ref) {
 		return ref.entity
 	}

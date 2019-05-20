@@ -14,19 +14,19 @@ import dk.sdu.mdsd.guilang.guilang.TextColor
 import dk.sdu.mdsd.guilang.guilang.TextSize
 import dk.sdu.mdsd.guilang.guilang.TextValue
 import dk.sdu.mdsd.guilang.guilang.UnitInstance
+import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
 import dk.sdu.mdsd.guilang.guilang.Vertical
 import java.util.ArrayList
 import java.util.HashMap
 import java.util.List
 import java.util.Map
-import dk.sdu.mdsd.guilang.guilang.UnitInstanceOption
 
 class EntitySpecificationsProvider {
 	Map<Class<? extends Entity>, List<EntityOption>> entityOptions
-	
+
 	new() {
 		entityOptions = new HashMap
-		
+
 		// Available Entities
 		val vertical = new ArrayList<EntityOption>
 		val horizontal = new ArrayList<EntityOption>
@@ -36,7 +36,7 @@ class EntitySpecificationsProvider {
 		val checkbox = new ArrayList<EntityOption>
 		val textArea = new ArrayList<EntityOption>
 		val unitInstance = new ArrayList<EntityOption>
-		
+
 		// Available Options
 		val dimensions = new EntityOption(DimOption, "dimensions")
 		val size = new EntityOption(SizeOption, "size")
@@ -45,17 +45,17 @@ class EntitySpecificationsProvider {
 		val textSize = new EntityOption(TextSize, "text-size")
 		val textValue = new EntityOption(TextValue, "text")
 		val unitInstanceOption = new EntityOption(UnitInstanceOption, "")
-		
+
 		// Assign Options
 		vertical.addAll(dimensions, bgColor)
-		horizontal.addAll(dimensions, bgColor)		
+		horizontal.addAll(dimensions, bgColor)
 		button.addAll(size, bgColor, textColor, textSize, textValue)
 		label.addAll(textColor, textSize, textValue)
 		input.addAll(textColor, textSize, textValue, bgColor)
 		checkbox.addAll(size)
 		textArea.addAll(dimensions, bgColor, textSize, textColor, textValue)
 		unitInstance.addAll(unitInstanceOption)
-		
+
 		// Populate Map
 		entityOptions.put(Vertical, vertical)
 		entityOptions.put(Horizontal, horizontal)
@@ -66,16 +66,16 @@ class EntitySpecificationsProvider {
 		entityOptions.put(TextArea, textArea)
 		entityOptions.put(UnitInstance, unitInstance)
 	}
-	
-	def getSpecifications(Class<? extends Entity> type){
+
+	def getSpecifications(Class<? extends Entity> type) {
 		var res = entityOptions.getOrDefault(type, null)
 		if(res !== null) return res
-		
-		for(c : entityOptions.keySet) {
-			if(c.isAssignableFrom(type)) {
+
+		for (c : entityOptions.keySet) {
+			if (c.isAssignableFrom(type)) {
 				return entityOptions.get(c)
 			}
-		} 
+		}
 		return null
-	}	
+	}
 }

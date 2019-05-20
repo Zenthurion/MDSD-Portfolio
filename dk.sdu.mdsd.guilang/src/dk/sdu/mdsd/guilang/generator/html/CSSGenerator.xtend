@@ -13,52 +13,53 @@ import java.util.ArrayList
 class CSSGenerator implements ILanguageGenerator {
 
 	val GuilangGenerator gen
-	val HTMLGenerator2 html
-	
-	new(GuilangGenerator generator, HTMLGenerator2 html) {
+	val HTMLGenerator html
+
+	new(GuilangGenerator generator, HTMLGenerator html) {
 		gen = generator
 		this.html = html
 	}
 
 	override void generate() {
 		gen.fsa.generateFile(gen.title + '.css', generateCSS)
-		
+
 		gen.fsa.generateFile("defaults.css", generateDefaults)
 	}
 
 	def generateCSS() {
 		'''
-		«FOR instance : html.entityInstances»
-			«instance.generate»
-		«ENDFOR»
+			«FOR instance : html.entityInstances»
+				«instance.generate»
+			«ENDFOR»
 		'''
 	}
-	
+
 	def dispatch CharSequence generate(EntityInstance instance) {
 		val options = new ArrayList<CharSequence>
-		for(o : instance.options) {
+		for (o : instance.options) {
 			val str = o.generate()
 			if(str !== null) options.add(str)
 		}
-		
+
 		if(options.size === 0) return '''''';
-		
+
 		'''
-		#«instance.identifier» {
-			«FOR o : options»
-				«o»
-			«ENDFOR»
-		}
+			#«instance.identifier» {
+				«FOR o : options»
+					«o»
+				«ENDFOR»
+			}
 		'''
 	}
-	
+
 	def dispatch CharSequence generate(Option o) {
-		switch(o) {
+		switch (o) {
 			TextColorImpl: '''color: «o.color»;'''
 			TextSizeImpl: '''font-size: «o.value + o.unit»;'''
 			BackgroundColorImpl: '''«IF o.ref === null»background-color: «o.color»;«ELSE»background-color: «o.ref.value»;«ENDIF»'''
 			DimOptionImpl: '''width: «o.width»;\nheight: «o.height»;'''
-			default: null
+			default:
+				null
 		}
 	}
 
@@ -89,7 +90,6 @@ class CSSGenerator implements ILanguageGenerator {
 				width: 100%;
 				height: 100%;
 				font-size: 22px;
-				border: 1px solid black;
 			}
 			.input {
 				width: 100%;

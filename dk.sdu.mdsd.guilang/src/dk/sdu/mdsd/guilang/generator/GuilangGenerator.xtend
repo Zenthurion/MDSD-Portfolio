@@ -3,12 +3,12 @@
  */
 package dk.sdu.mdsd.guilang.generator
 
-import dk.sdu.mdsd.guilang.generator.html.HTMLGenerator2
 import dk.sdu.mdsd.guilang.guilang.Root
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
+import dk.sdu.mdsd.guilang.generator.html.HTMLGenerator
 
 /**
  * Generates code from your model files on save.
@@ -34,7 +34,7 @@ class GuilangGenerator extends AbstractGenerator {
 		root = resource.allContents.filter(Root).next
 		title = getFileName(resource)
 		
-		val ILanguageGenerator generator = new HTMLGenerator2(this)
+		val ILanguageGenerator generator = new HTMLGenerator(this)
 		generator.generate()
 	}
 

@@ -35,28 +35,29 @@ class GuilangValidator extends AbstractGuilangValidator {
 	 */
 	@Check
 	def checkValidOptions(Specification spec) {
-//		var correctOptions = getSpecifications(spec.entity.class)
-//		
-//		var int index = 0
-//		for (o : spec.options) {
-//			var flag = false;
-//			for (c : correctOptions) {
-//				if(c.option.isInstance(o)) {
-//					flag = true
-//				}
-//			}	
-//			if(!flag) {
-//				error('''«o.class.shortName» is not a valid option for an entity of type «spec.entity.class.shortName»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
-//			}
-//			index++
-//		}
+		var correctOptions = getSpecifications(spec.ref.entity.class)
+		
+		var int index = 0
+		for (o : spec.options) {
+			var flag = false;
+			for (c : correctOptions) {
+				if(c.option.isInstance(o)) {
+					flag = true
+				}
+			}	
+			if(!flag) {
+				error('''«o.class.shortName» is not a valid option for an entity of type «spec.ref.entity.class.shortName»''', GuilangPackage.Literals.SPECIFICATION__OPTIONS, index, INVALID_OPTION)
+			}
+			index++
+		}
 	} 
 	
+	// check this in scoping?
 //	@Check
 //	def checkCircularUnitInstance(UnitInstance unitInstance) {
 //
 //		if(unitInstance.isNested(null)) {
-//			error('''Cyclic creation of Unit "ï¿½unitInstance.unit.nameï¿½" is not allowed''', 
+//			error('''Cyclic creation of Unit «unitInstance.unit.name» is not allowed''', 
 //						GuilangPackage.Literals.UNIT_INSTANCE__UNIT, 
 //						CYCLIC_UNIT, 
 //						unitInstance.unit.name)
